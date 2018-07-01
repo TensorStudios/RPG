@@ -1,5 +1,6 @@
 import pygame as pg
-from settings import *
+from Settings import *
+
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -19,6 +20,7 @@ class Player(pg.sprite.Sprite):
     def update(self):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
+
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):

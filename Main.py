@@ -15,6 +15,7 @@ import pygame as pg
 import sys
 from Settings import *
 from Sprites import *
+from os import path
 
 
 class Game:
@@ -28,15 +29,22 @@ class Game:
         self.load_data()
 
     def load_data(self):
-        pass
+        game_folder = path.dirname(__file__)
+        self.map_data = []
+        with open(path.join(game_folder, "map.txt"), "rt") as f:
+            for line in f:
+                self.map_data.append(line)
 
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.player = Player(self, 10, 10)
-        for x in range(10, 20):
-            Wall(self, x, 5)
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == "1":
+                    Wall(self, col, row)
+                if tile == "P":
+                    self.player = Player(self, col, row)
 
     def run(self):
         # game loop - set self.playing = False to end the game

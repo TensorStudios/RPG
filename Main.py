@@ -24,14 +24,13 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
-        # Hold down keys
         pg.key.set_repeat(500, 100)
         self.load_data()
 
     def load_data(self):
         game_folder = path.dirname(__file__)
         self.map_data = []
-        with open(path.join(game_folder, "map.txt"), "rt") as f:
+        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
             for line in f:
                 self.map_data.append(line)
 
@@ -41,9 +40,9 @@ class Game:
         self.walls = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
-                if tile == "1":
+                if tile == '1':
                     Wall(self, col, row)
-                if tile == "P":
+                if tile == 'P':
                     self.player = Player(self, col, row)
 
     def run(self):
@@ -83,14 +82,6 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-                if event.key == pg.K_LEFT:
-                    self.player.move(dx=-1)
-                if event.key == pg.K_RIGHT:
-                    self.player.move(dx=1)
-                if event.key == pg.K_UP:
-                    self.player.move(dy=-1)
-                if event.key == pg.K_DOWN:
-                    self.player.move(dy=1)
 
     def show_start_screen(self):
         pass

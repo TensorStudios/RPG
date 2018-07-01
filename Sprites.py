@@ -33,10 +33,6 @@ class Player(pg.sprite.Sprite):
             self.vel += vec(0, -PLAYER_SPEED)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel += vec(0, PLAYER_SPEED)
-        # If player is going diagonally move at the right speed
-        # if self.vx != 0 and self.vy != 0:
-        #     self.vx *= 0.7071
-        #     self.vy *= 0.7071
 
     def collide_with_walls(self, dir):
         if dir == 'x':

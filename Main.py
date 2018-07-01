@@ -34,7 +34,7 @@ class Game:
 
     def new(self):
         # initialize all variables and do all the setup for a new game
-        self.all_sprites = pg.sprite.Group()
+        self.all_sprites = pg.sprite.LayeredUpdates()
         self.walls = pg.sprite.Group()
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):

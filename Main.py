@@ -23,6 +23,7 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
+        # Hold down keys
         pg.key.set_repeat(500, 100)
         self.load_data()
 

@@ -43,6 +43,7 @@ class Player(pg.sprite.Sprite):
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
         self.pos = vec(x, y) * TILESIZE
+        self.health = PLAYER_HEALTH
 
     def get_keys(self):
         self.vel = vec(0, 0)
@@ -83,6 +84,7 @@ class Mob(pg.sprite.Sprite):
         self.acc = vec(0, 0)
         self.rect.center = self.pos
         self.rot = 0
+        self.health = MOB_HEALTH
 
     def update(self):
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))

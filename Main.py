@@ -143,7 +143,7 @@ class Game:
                     waiting = False
                     self.quit()
                 if event.type == pg.KEYUP:
-                    wating = False
+                    waiting = False
 
 
 

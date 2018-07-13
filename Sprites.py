@@ -43,7 +43,18 @@ class Player(pg.sprite.Sprite):
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
         self.pos = vec(x, y) * TILESIZE
+        self.direction = "N"
         self.health = PLAYER_HEALTH
+        self.last_attack = self.game.clock.get_ticks()
+
+    def attack(self):
+        # Draw a rectangle based on the direction of the player
+        # Collide that rectangle with enemy
+        now = self.game.clock.get_ticks()
+        # Check if it has been long enough to
+        if now > PLAYER_ATTACK_DELAY:
+            self.last_attack = now
+            print("I am attacking")
 
     def get_keys(self):
         self.vel = vec(0, 0)
@@ -56,6 +67,8 @@ class Player(pg.sprite.Sprite):
             self.vel += vec(0, -PLAYER_SPEED)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel += vec(0, PLAYER_SPEED)
+        if keys[pg.K_SPACE]:
+            self.attack()
 
     def update(self):
         self.get_keys()
@@ -101,6 +114,19 @@ class Mob(pg.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
+
+
+class MeleeSwing(pg.sprite.Sprite):
+    def __init__(self, game, corner, pos):
+        self._layer = ATTACK_LAYER
+        self.groups = game.all_sprites, game.weapons
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE / 2, TILESIZE / 2))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+
+        
 
 
 class Wall(pg.sprite.Sprite):

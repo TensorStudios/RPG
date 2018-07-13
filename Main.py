@@ -37,6 +37,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.weapons = pg.sprite.Group()
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':

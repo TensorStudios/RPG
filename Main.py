@@ -18,6 +18,53 @@ from Sprites import *
 from os import path
 from tilemap import *
 
+# HUD functions
+def draw_player_health(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 500
+    BAR_HEIGHT = 60
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    if pct > 0.6:
+        col = GREEN
+    elif pct > 0.3:
+        col = YELLOW
+    else:
+        col = RED
+    pg.draw.rect(surf, col, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_mana(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 500
+    BAR_HEIGHT = 40
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLUE, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_equip1(surf, x, y, pct):
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 100
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLACK, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_equip2(surf, x, y, pct):
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 100
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLACK, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 class Game:
     def __init__(self):
@@ -88,6 +135,11 @@ class Game:
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
+        # HUD Functions
+        draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
+        draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
+        draw_player_equip1(self.screen, 700, 10, 1)
+        draw_player_equip2(self.screen, 830, 10, 1)
         pg.display.flip()
 
     def events(self):

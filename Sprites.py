@@ -32,19 +32,6 @@ def collide_with_walls(sprite, group, dir):
             sprite.hit_rect.centery = sprite.pos.y
 
 
-def degreesToRadians(deg):
-    return deg/180.0 * math.pi
-
-
-def draw_circle_arc(screen, color, center, radius, startDeg, endDeg, thickness):
-    (x, y) = center
-    rect = (x - radius, y - radius, radius * 2, radius * 2)
-    startRad = degreesToRadians(startDeg)
-    endRad = degreesToRadians(endDeg)
-
-    pg.draw.arc(screen, color, rect, startRad, endRad, thickness)
-
-
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = PLAYER_LAYER
@@ -74,9 +61,8 @@ class Player(pg.sprite.Sprite):
         for mob in self.game.mobs:
             if self.pos.distance_squared_to(mob.pos) <= self.attack_radius ** 2:
                 mobs_in_range.append(mob)
-        # Collide that rectangle with enemy
-        now = pg.time.get_ticks()
         # Check if it has been long enough
+        now = pg.time.get_ticks()
         if now - WEAPON_SPEED > self.last_attack:
             self.last_attack = now
             # print(f"Player Angle: {self.direction}")
@@ -88,6 +74,7 @@ class Player(pg.sprite.Sprite):
                 low_angle = (self.direction - WEAPON_ARC) % 360
                 # The angle of the mob to the player
                 mob_angle = (self.pos - mob.pos).normalize()
+                # Add 180 degrees to make it easy to compare angles
                 mob_angle = vec(0, 0).angle_to(mob_angle) + 180
 
                 # See if the mob angle is within the two angles
@@ -108,14 +95,16 @@ class Player(pg.sprite.Sprite):
 
     def attack_animation(self):
         # Find points of triangle
+        # Player's position, adjusted to camera
         point1 = self.game.camera.apply_pos(self.pos)
+        # Other 2 points of the triangle, measure weapon distance away at the angle of attack
         point2 = vec()
         point3 = vec()
         point2.from_polar((WEAPON_RANGE, self.direction + WEAPON_ARC))
         point3.from_polar((WEAPON_RANGE, self.direction - WEAPON_ARC))
         point2 += point1
         point3 += point1
-        # print(point1, point2, point3)
+        # Display on screen for 0.1 Seconds then toggle self.attacking to off
         now = pg.time.get_ticks()
         if now - 100 < self.last_attack:
             pg.draw.polygon(self.game.screen, WHITE, [point1, point2, point3])

@@ -87,7 +87,7 @@ class Game:
         # self.draw_grid()
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
-        # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
+        self.player.attack_animation()
         pg.display.flip()
 
     def events(self):

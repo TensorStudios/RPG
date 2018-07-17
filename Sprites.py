@@ -60,7 +60,7 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(x, y) * TILESIZE
         self.direction = 270.0
         self.health = PLAYER_HEALTH
-        self.last_attack = pg.time.get_ticks()
+        self.last_attack = pg.time.get_ticks() - 150
         self.attack_radius = WEAPON_RANGE
         self.attack_speed = WEAPON_SPEED
         self.damage = WEAPON_DAMAGE
@@ -79,7 +79,7 @@ class Player(pg.sprite.Sprite):
         # Check if it has been long enough
         if now - WEAPON_SPEED > self.last_attack:
             self.last_attack = now
-            print(f"Player Angle: {self.direction}")
+            # print(f"Player Angle: {self.direction}")
             for mob in mobs_in_range:
                 # Check if the mob is within the weapon arc
                 # largest degree
@@ -93,28 +93,28 @@ class Player(pg.sprite.Sprite):
                 # See if the mob angle is within the two angles
                 if high_angle >= mob_angle >= low_angle:
                     mob.health -= WEAPON_DAMAGE
-                    print("Hit")
+                    # print("Hit")
                 # account for if the mob is at a high angle and high_angle is at a low value
                 elif high_angle < 90:
                     if mob_angle >= 315:
                         mob_angle -= 360
                     low_angle -= 360
                     if high_angle >= mob_angle >= low_angle:
-                        print("Hit")
+                        # print("Hit")
                         mob.health -= WEAPON_DAMAGE
-                else:
-                    print("Not facing the right direction")
-                print(f"High: {high_angle}, Mob angle: {mob_angle}, Low angle: {low_angle}")
+                # else:
+                #     print("Not facing the right direction")
+                # print(f"High: {high_angle}, Mob angle: {mob_angle}, Low angle: {low_angle}")
 
     def attack_animation(self):
         # Find points of triangle
-        point1 = self.pos
+        point1 = self.game.camera.apply_pos(self.pos)
         point2 = vec()
         point3 = vec()
         point2.from_polar((WEAPON_RANGE, self.direction + WEAPON_ARC))
         point3.from_polar((WEAPON_RANGE, self.direction - WEAPON_ARC))
-        point2 += self.pos
-        point3 += self.pos
+        point2 += point1
+        point3 += point1
         # print(point1, point2, point3)
         now = pg.time.get_ticks()
         if now - 100 < self.last_attack:
@@ -189,19 +189,6 @@ class Mob(pg.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
-
-
-class MeleeSwing(pg.sprite.Sprite):
-    def __init__(self, game, corner, pos):
-        self._layer = ATTACK_LAYER
-        self.groups = game.all_sprites, game.weapons
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE / 2, TILESIZE / 2))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-
-        
 
 
 class Wall(pg.sprite.Sprite):

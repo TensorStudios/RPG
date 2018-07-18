@@ -54,8 +54,6 @@ class Player(pg.sprite.Sprite):
         self.attacking = False
 
     def attack(self):
-        # Call animation
-        self.attacking = True
         # Find mobs in range
         mobs_in_range = []
         for mob in self.game.mobs:
@@ -64,6 +62,8 @@ class Player(pg.sprite.Sprite):
         # Check if it has been long enough
         now = pg.time.get_ticks()
         if now - WEAPON_SPEED > self.last_attack:
+            # Toggle animation flag
+            self.attacking = True
             self.last_attack = now
             # print(f"Player Angle: {self.direction}")
             for mob in mobs_in_range:

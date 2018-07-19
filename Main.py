@@ -18,7 +18,6 @@ from Sprites import *
 from os import path
 from tilemap import *
 
-
 def text_objects(text, font):
     textSurface = font.render(text, True, BLACK)
     return textSurface, textSurface.get_rect()
@@ -38,13 +37,13 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
     else:
         pg.draw.rect(game.screen, ic, (x, y, w, h))
 
-    smallText = pg.font.Font("freesansbold.ttf", 20)
+    smallText = pg.font.Font("freesansbold.ttf", 30)
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x + (w / 2)), (y + (h / 2)))
     game.screen.blit(textSurf, textRect)
 
     if x + w > mouse[0] > x and y + h > mouse[1] > y:
-        pg.draw.rect(game.screen, ac, (x, y, w, h))
+         pg.draw.rect(game.screen, ac, (x, y, w, h))
     else:
         pg.draw.rect(game.screen, ic, (x, y, w, h))
 
@@ -138,7 +137,7 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-                if event.key == pg.K_p:
+                if event.key == pg.K_TAB:
                     self.paused = not self.paused
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
@@ -165,30 +164,25 @@ class Game:
             text_rect.center = (x, y)
         self.screen.blit(text_surface, text_rect)
 
-    def show_start_screen(self):
-        self.intro = True
-        while self.intro:
+    def show_start_screen(game):
+        game.intro = True
+        while game.intro:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
-            self.screen.fill(DARKGREY)
-            largeText = pg.font.Font(self.gameover_font, 90)
-            TextSurf, TextRect = text_objects("TOWER DEFENSE!!!", largeText)
-            TextRect.center = ((WIDTH / 2), (HEIGHT / 2))
-            self.screen.blit(TextSurf, TextRect)
+            game.screen.fill(DARKGREY)
+            largeText = pg.font.Font('freesansbold.ttf', 90)
+            TextSurf, TextRect = text_objects("Game Name TBD", largeText)
+            TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
+            game.screen.blit(TextSurf, TextRect)
 
-            button(game, "START", 150, 450, 150, 100, LIGHTGREEN, GREEN, "play")
-            button(game, "QUIT", 150, 550, 150, 100, LIGHTRED, RED, "quit")
+            button(game, "NEW GAME", WIDTH/2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(game, "LOAD", WIDTH/2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
+            button(game, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
+            button(game, "QUIT", WIDTH/2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
 
             pg.display.update()
-
-
-        # self.screen.fill(DARKGREY)
-        # self.draw_text("GAME NAME TBD", self.gameover_font, 50, BLACK, WIDTH/2, HEIGHT/3, align='center')
-        # self.draw_text("PRESS ANY KEY TO BEGIN", self.gameover_font, 50, BLACK, WIDTH / 2, HEIGHT / 2, align='center')
-        # pg.display.flip()
-        # self.wait_for_key()
 
     def show_go_screen(self):
         self.screen.fill(BLACK)
@@ -209,8 +203,6 @@ class Game:
                 if event.type == pg.KEYUP:
                     waiting = False
 
-
-
 # create the game object
 intro = True
 g = Game()
@@ -219,3 +211,4 @@ while True:
     g.new()
     g.run()
     g.show_go_screen()
+    g.show_start_screen()

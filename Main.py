@@ -18,6 +18,38 @@ from Sprites import *
 from os import path
 from tilemap import *
 
+def text_objects(text, font):
+    textSurface = font.render(text, True, BLACK)
+    return textSurface, textSurface.get_rect()
+
+def button(game, msg, x, y, w, h, ic, ac, action=None):
+    mouse = pg.mouse.get_pos()
+    click = pg.mouse.get_pressed()
+
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+        pg.draw.rect(game.screen, ac, (x, y, w, h))
+        if click[0] == 1 and action != None:
+            if action == "play":
+                game.intro = False
+            elif action == "quit":
+                pg.quit()
+                quit()
+    else:
+        pg.draw.rect(game.screen, ic, (x, y, w, h))
+
+    smallText = pg.font.Font("freesansbold.ttf", 30)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ((x + (w / 2)), (y + (h / 2)))
+    game.screen.blit(textSurf, textRect)
+
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+         pg.draw.rect(game.screen, ac, (x, y, w, h))
+    else:
+        pg.draw.rect(game.screen, ic, (x, y, w, h))
+
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ((x + (w / 2)), (y + (h / 2)))
+    game.screen.blit(textSurf, textRect)
 # HUD functions
 def draw_player_health(surf, x, y, pct):
     if pct < 0:
@@ -82,6 +114,8 @@ class Game:
         # Load game map
         self.map = Map(path.join(game_folder, 'SBMap.txt'))
         self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
+        self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
+        self.dim_screen.fill((0,0,0,180))
 
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -101,6 +135,7 @@ class Game:
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
+        self.paused = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -108,7 +143,8 @@ class Game:
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
-            self.update()
+            if not self.paused:
+                self.update()
             self.draw()
 
     def quit(self):
@@ -151,6 +187,9 @@ class Game:
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
+        if self.paused:
+            self.screen.blit(self.dim_screen, (0,0))
+            self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH/2, HEIGHT/2, align='center')
         # HUD Functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
         draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
@@ -171,9 +210,8 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-
-    def show_start_screen(self):
-        pass
+                if event.key == pg.K_TAB:
+                    self.paused = not self.paused
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)
@@ -199,6 +237,26 @@ class Game:
             text_rect.center = (x, y)
         self.screen.blit(text_surface, text_rect)
 
+    def show_start_screen(self):
+        self.intro = True
+        while self.intro:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    quit()
+            self.screen.fill(DARKGREY)
+            largeText = pg.font.Font('freesansbold.ttf', 90)
+            TextSurf, TextRect = text_objects("Game Name TBD", largeText)
+            TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
+            self.screen.blit(TextSurf, TextRect)
+
+            button(self, "NEW GAME", WIDTH/2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(self, "LOAD", WIDTH/2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
+            button(self, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
+            button(self, "QUIT", WIDTH/2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
+
+            pg.display.update()
+
     def show_go_screen(self):
         self.screen.fill(BLACK)
         self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH/2, HEIGHT/2, align='center')
@@ -218,12 +276,10 @@ class Game:
                 if event.type == pg.KEYUP:
                     waiting = False
 
-
-
 # create the game object
 g = Game()
-g.show_start_screen()
 while True:
+    g.show_start_screen()
     g.new()
     g.run()
     g.show_go_screen()

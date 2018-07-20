@@ -1,4 +1,6 @@
 import pygame as pg
+import math
+
 from Settings import *
 
 
@@ -43,7 +45,71 @@ class Player(pg.sprite.Sprite):
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
         self.pos = vec(x, y) * TILESIZE
+        self.direction = 270.0
         self.health = PLAYER_HEALTH
+        self.last_attack = pg.time.get_ticks() - 150
+        self.attack_radius = WEAPON_RANGE
+        self.attack_speed = WEAPON_SPEED
+        self.damage = WEAPON_DAMAGE
+        self.attacking = False
+
+    def attack(self):
+        # Call animation
+        self.attacking = True
+        # Find mobs in range
+        mobs_in_range = []
+        for mob in self.game.mobs:
+            if self.pos.distance_squared_to(mob.pos) <= self.attack_radius ** 2:
+                mobs_in_range.append(mob)
+        # Check if it has been long enough
+        now = pg.time.get_ticks()
+        if now - WEAPON_SPEED > self.last_attack:
+            self.last_attack = now
+            # print(f"Player Angle: {self.direction}")
+            for mob in mobs_in_range:
+                # Check if the mob is within the weapon arc
+                # largest degree
+                high_angle = (self.direction + WEAPON_ARC) % 360
+                # Smallest degree
+                low_angle = (self.direction - WEAPON_ARC) % 360
+                # The angle of the mob to the player
+                mob_angle = (self.pos - mob.pos).normalize()
+                # Add 180 degrees to make it easy to compare angles
+                mob_angle = vec(0, 0).angle_to(mob_angle) + 180
+
+                # See if the mob angle is within the two angles
+                if high_angle >= mob_angle >= low_angle:
+                    mob.health -= WEAPON_DAMAGE
+                    # print("Hit")
+                # account for if the mob is at a high angle and high_angle is at a low value
+                elif high_angle < 90:
+                    if mob_angle >= 315:
+                        mob_angle -= 360
+                    low_angle -= 360
+                    if high_angle >= mob_angle >= low_angle:
+                        # print("Hit")
+                        mob.health -= WEAPON_DAMAGE
+                # else:
+                #     print("Not facing the right direction")
+                # print(f"High: {high_angle}, Mob angle: {mob_angle}, Low angle: {low_angle}")
+
+    def attack_animation(self):
+        # Find points of triangle
+        # Player's position, adjusted to camera
+        point1 = self.game.camera.apply_pos(self.pos)
+        # Other 2 points of the triangle, measure weapon distance away at the angle of attack
+        point2 = vec()
+        point3 = vec()
+        point2.from_polar((WEAPON_RANGE, self.direction + WEAPON_ARC))
+        point3.from_polar((WEAPON_RANGE, self.direction - WEAPON_ARC))
+        point2 += point1
+        point3 += point1
+        # Display on screen for 0.1 Seconds then toggle self.attacking to off
+        now = pg.time.get_ticks()
+        if now - 100 < self.last_attack:
+            pg.draw.polygon(self.game.screen, WHITE, [point1, point2, point3])
+        else:
+            self.attacking = False
 
     def get_keys(self):
         self.vel = vec(0, 0)
@@ -56,9 +122,18 @@ class Player(pg.sprite.Sprite):
             self.vel += vec(0, -PLAYER_SPEED)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel += vec(0, PLAYER_SPEED)
+        if keys[pg.K_SPACE]:
+            self.attack()
+
+    def get_direction(self):
+        # find what direction the player is facing
+        if self.vel != vec(0, 0):
+            self.direction = vec(0, 0).angle_to(self.vel.normalize())
+            # print(self.direction)
 
     def update(self):
         self.get_keys()
+        self.get_direction()
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
@@ -87,6 +162,8 @@ class Mob(pg.sprite.Sprite):
         self.health = MOB_HEALTH
 
     def update(self):
+        if self.health <= 0:
+            self.kill()
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(BLACK)

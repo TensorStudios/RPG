@@ -224,23 +224,23 @@ class Game:
             text_rect.center = (x, y)
         self.screen.blit(text_surface, text_rect)
 
-    def show_start_screen(game):
-        game.intro = True
-        while game.intro:
+    def show_start_screen(self):
+        self.intro = True
+        while self.intro:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
-            game.screen.fill(DARKGREY)
+            self.screen.fill(DARKGREY)
             largeText = pg.font.Font('freesansbold.ttf', 90)
             TextSurf, TextRect = text_objects("Game Name TBD", largeText)
             TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
-            game.screen.blit(TextSurf, TextRect)
+            self.screen.blit(TextSurf, TextRect)
 
-            button(game, "NEW GAME", WIDTH/2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
-            button(game, "LOAD", WIDTH/2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
-            button(game, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
-            button(game, "QUIT", WIDTH/2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
+            button(self, "NEW GAME", WIDTH/2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(self, "LOAD", WIDTH/2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
+            button(self, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
+            button(self, "QUIT", WIDTH/2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
 
             pg.display.update()
 
@@ -264,11 +264,9 @@ class Game:
                     waiting = False
 
 # create the game object
-intro = True
 g = Game()
-g.show_start_screen()
 while True:
+    g.show_start_screen()
     g.new()
     g.run()
     g.show_go_screen()
-    g.show_start_screen()

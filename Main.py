@@ -277,10 +277,9 @@ class Game:
                     waiting = False
 
 # create the game object
-intro = True
 g = Game()
 while True:
+    g.show_start_screen()
     g.new()
     g.run()
     g.show_go_screen()
-    g.show_start_screen()

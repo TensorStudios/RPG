@@ -50,6 +50,53 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x + (w / 2)), (y + (h / 2)))
     game.screen.blit(textSurf, textRect)
+# HUD functions
+def draw_player_health(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 500
+    BAR_HEIGHT = 60
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    if pct > 0.6:
+        col = GREEN
+    elif pct > 0.3:
+        col = YELLOW
+    else:
+        col = RED
+    pg.draw.rect(surf, col, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_mana(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 500
+    BAR_HEIGHT = 40
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLUE, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_equip1(surf, x, y, pct):
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 100
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLACK, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+def draw_player_equip2(surf, x, y, pct):
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 100
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    pg.draw.rect(surf, BLACK, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 class Game:
     def __init__(self):
@@ -60,8 +107,11 @@ class Game:
         self.load_data()
 
     def load_data(self):
+        # Load folder locations
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, 'img')
+
+        # Load game map
         self.map = Map(path.join(game_folder, 'SBMap.txt'))
         self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
@@ -72,6 +122,8 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+
+        # Load map, spawn appropriate sprites
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -80,6 +132,8 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'P':
                     self.player = Player(self, col, row)
+
+        # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
         self.paused = False
 
@@ -101,7 +155,8 @@ class Game:
         # update portion of the game loop
         self.all_sprites.update()
         self.camera.update(self.player)
-        # mobs hit player
+
+        # mobs hit player, if a mob runs into the player, knock playe back and deal damage to player
         hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
         for hit in hits:
             self.player.health -= MOB_DAMAGE
@@ -111,6 +166,7 @@ class Game:
         if hits:
             self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
 
+    # Debug function to draw grid to screen
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
@@ -118,15 +174,19 @@ class Game:
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
 
     def draw(self):
+        # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
+
+        # Set the background of the screen to the Background color
         self.screen.fill(BGCOLOR)
+
+        # Debug draw grid
         # self.draw_grid()
+
+        # Draw each sprite to the screen
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
-        if self.paused:
-            self.screen.blit(self.dim_screen, (0,0))
-            self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH/2, HEIGHT/2, align='center')
         pg.display.flip()
 
     def events(self):

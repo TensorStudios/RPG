@@ -1,5 +1,6 @@
 import pygame as pg
 from Settings import *
+vec = pg.math.Vector2
 
 
 class Map:
@@ -23,6 +24,12 @@ class Camera:
 
     def apply(self, entity):
         return entity.rect.move(self.camera.topleft)
+
+    def apply_rect(self, rect):
+        return rect.move(self.camera.topleft)
+
+    def apply_pos(self, pos):
+        return pos + vec(self.camera.topleft)
 
     def update(self, target):
         x = -target.rect.x + int(WIDTH / 2)

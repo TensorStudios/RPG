@@ -10,7 +10,6 @@ Devin Emnett
 
 """
 
-
 import pygame as pg
 import sys
 from Settings import *
@@ -18,9 +17,11 @@ from Sprites import *
 from os import path
 from tilemap import *
 
+
 def text_objects(text, font):
     textSurface = font.render(text, True, BLACK)
     return textSurface, textSurface.get_rect()
+
 
 def button(game, msg, x, y, w, h, ic, ac, action=None):
     mouse = pg.mouse.get_pos()
@@ -43,13 +44,15 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
     game.screen.blit(textSurf, textRect)
 
     if x + w > mouse[0] > x and y + h > mouse[1] > y:
-         pg.draw.rect(game.screen, ac, (x, y, w, h))
+        pg.draw.rect(game.screen, ac, (x, y, w, h))
     else:
         pg.draw.rect(game.screen, ic, (x, y, w, h))
 
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x + (w / 2)), (y + (h / 2)))
     game.screen.blit(textSurf, textRect)
+
+
 # HUD functions
 def draw_player_health(surf, x, y, pct):
     if pct < 0:
@@ -68,6 +71,7 @@ def draw_player_health(surf, x, y, pct):
     pg.draw.rect(surf, col, fill_rect)
     pg.draw.rect(surf, WHITE, outline_rect, 2)
 
+
 def draw_player_mana(surf, x, y, pct):
     if pct < 0:
         pct = 0
@@ -79,6 +83,7 @@ def draw_player_mana(surf, x, y, pct):
     pg.draw.rect(surf, BLUE, fill_rect)
     pg.draw.rect(surf, WHITE, outline_rect, 2)
 
+
 def draw_player_equip1(surf, x, y, pct):
     BAR_LENGTH = 100
     BAR_HEIGHT = 100
@@ -87,6 +92,7 @@ def draw_player_equip1(surf, x, y, pct):
     fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
     pg.draw.rect(surf, BLACK, fill_rect)
     pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 def draw_player_equip2(surf, x, y, pct):
     BAR_LENGTH = 100
@@ -110,28 +116,33 @@ class Game:
         # Load folder locations
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, 'img')
+        self.map_folder = path.join(game_folder, "Maps")
 
         # Load game map
         self.map = Map(path.join(game_folder, 'SBMap.txt'))
+        self.map_img = None
         self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
-        self.dim_screen.fill((0,0,0,180))
+        self.dim_screen.fill((0, 0, 0, 180))
 
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.map = TiledMap(path.join(self.map_folder, "Map1.tmx"))
+        self.map_img = self.map.make_map()
+        self.map_rect = self.map_img.get_rect()
 
         # Load map, spawn appropriate sprites
-        for row, tiles in enumerate(self.map.data):
-            for col, tile in enumerate(tiles):
-                if tile == '1':
-                    Wall(self, col, row)
-                if tile == 'M':
-                    Mob(self, col, row)
-                if tile == 'P':
-                    self.player = Player(self, col, row)
+        for tile_object in self.map.tmxdata.objects:
+            object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
+            if tile_object.name == "Player":
+                self.player = Player(self, object_center.x, object_center.y)
+            if tile_object.name == "Mob":
+                Mob(self, object_center.x, object_center.y)
+            if tile_object.name == "Wall":
+                Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
@@ -178,7 +189,7 @@ class Game:
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
         # Set the background of the screen to the Background color
-        self.screen.fill(BGCOLOR)
+        self.screen.blit(self.map_img, self.camera.apply_rect(self.map_rect))
 
         # Debug draw grid
         # self.draw_grid()
@@ -188,8 +199,9 @@ class Game:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
         if self.paused:
-            self.screen.blit(self.dim_screen, (0,0))
-            self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH/2, HEIGHT/2, align='center')
+            self.screen.blit(self.dim_screen, (0, 0))
+            self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 2,
+                           align='center')
         # HUD Functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
         draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
@@ -250,17 +262,17 @@ class Game:
             TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
             self.screen.blit(TextSurf, TextRect)
 
-            button(self, "NEW GAME", WIDTH/2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
-            button(self, "LOAD", WIDTH/2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
+            button(self, "NEW GAME", WIDTH / 2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(self, "LOAD", WIDTH / 2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
             button(self, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
-            button(self, "QUIT", WIDTH/2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
+            button(self, "QUIT", WIDTH / 2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")
 
             pg.display.update()
 
     def show_go_screen(self):
         self.screen.fill(BLACK)
-        self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH/2, HEIGHT/2, align='center')
-        self.draw_text("Press Any Key", self.gameover_font, 75, WHITE, WIDTH/2, HEIGHT*3/4, align='center')
+        self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH / 2, HEIGHT / 2, align='center')
+        self.draw_text("Press Any Key", self.gameover_font, 75, WHITE, WIDTH / 2, HEIGHT * 3 / 4, align='center')
         pg.display.flip()
         self.wait_for_key()
 
@@ -275,6 +287,7 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+
 
 # create the game object
 g = Game()

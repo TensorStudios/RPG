@@ -90,6 +90,7 @@ class Player(pg.sprite.Sprite):
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
         self.hit_rect = PLAYER_HIT_RECT
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
@@ -205,8 +206,10 @@ class Player(pg.sprite.Sprite):
         self.pos += self.vel * self.game.dt
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.walls, 'x')
+        collide_with_walls(self, self.game.npcs, 'x')
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
+        collide_with_walls(self, self.game.npcs, 'y')
         self.rect.center = self.hit_rect.center
 
         # Animate character
@@ -244,6 +247,7 @@ class Mob(pg.sprite.Sprite):
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.image = self.images["Zombie_r"]
         self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
         self.hit_rect = MOB_HIT_RECT.copy()
         self.hit_rect.center = self.rect.center
         self.pos = vec(x, y)
@@ -253,13 +257,22 @@ class Mob(pg.sprite.Sprite):
         self.rot = 0
         self.health = MOB_HEALTH
 
+    def avoid_mobs(self):
+        for mob in self.game.mobs:
+            if mob != self:
+                dist = self.pos - mob.pos
+                if 0 < dist.length() < MOB_AVOID_RADIUS:
+                    self.acc += dist.normalize()
+
     def update(self):
         if self.health <= 0:
             self.kill()
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-        self.rect = self.image.get_rect()
+        # self.rect = self.image.get_rect()
         self.rect.center = self.pos
-        self.acc = vec(MOB_SPEED, 0).rotate(-self.rot)
+        self.acc = vec(1, 0).rotate(-self.rot)
+        self.avoid_mobs()
+        self.acc.scale_to_length(MOB_SPEED)
         self.acc += self.vel * -1
         self.vel += self.acc * self.game.dt
         self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
@@ -272,6 +285,122 @@ class Mob(pg.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
+
+
+class NonPlayerCharacter(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.npcs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.images = {
+            "NPC_r": self.game.spritesheet_k_r.get_image(0, 0, 100, 100)
+        }
+        for image in self.images:
+            self.images[image].set_colorkey(BG_SPRITE_COLOR)
+        self.image = self.images["NPC_r"]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.hit_rect = self.rect.copy()
+        self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0
+        self.health = NPC_HEALTH
+        self.click_delay = pg.time.get_ticks()
+        self.active = False
+
+        # Specific variables for this NPC
+        self.health_packs = 1
+
+    def get_clicked(self):
+        mouse = pg.mouse.get_pressed()
+
+        # Check distance from player
+        now = pg.time.get_ticks()
+        dist = self.pos - self.game.player.hit_rect.center
+        if mouse[0]:
+            if self.game.camera.apply_rect(self.hit_rect).collidepoint(pg.mouse.get_pos()):
+                if now - self.click_delay > 1000:
+                    self.click_delay = now
+                    if 0 < dist.length() < SPEAK_RANGE:
+                        self.active = True
+        if dist.length() > SPEAK_RANGE:
+            self.active = False
+            self.reset_dialog()
+
+    def reset_dialog(self):
+        self.game.dialog = False
+        self.game.dialog_selection = None
+        self.game.dialog_text = ""
+        self.game.dialog_options = []
+        self.active = False
+
+    def dialog_text(self):
+        text = ""
+        options = []
+        if self.health_packs > 0:
+            text = "It is dangerous to go alone, take this"
+            options = ["Thanks", "Nod"]
+        else:
+            text = "You have already taken my health pack, back off man"
+            options = ["..."]
+
+        return text, options
+
+    def dialog_0(self):
+        if self.health_packs > 0:
+            self.health_packs -= 1
+            self.game.player.add_item("Health")
+
+    def dialog_1(self):
+        if self.health_packs > 0:
+            self.health_packs -= 1
+            self.game.player.add_item("Health")
+
+    def dialog_2(self):
+        pass
+
+    def dialog_3(self):
+        pass
+
+    def dialog_4(self):
+        pass
+
+    def update(self):
+        self.get_clicked()
+        if self.health <= 0:
+            self.kill()
+        # self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        self.acc = vec(NPC_SPEED, 0).rotate(-self.rot)
+        self.acc += self.vel * -1
+        self.vel += self.acc * self.game.dt
+        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+        self.hit_rect.centerx = self.pos.x
+        if self.vel.x >= 0:
+            self.image = self.images["NPC_r"]
+        else:
+            self.image = self.images["NPC_r"]
+        collide_with_walls(self, self.game.walls, 'x')
+        self.hit_rect.centery = self.pos.y
+        collide_with_walls(self, self.game.walls, 'y')
+        self.rect.center = self.hit_rect.center
+
+        if self.active:
+            if self.game.dialog_selection is None:
+                self.game.dialog = True
+                self.game.dialog_text, self.game.dialog_options = self.dialog_text()
+            elif self.game.dialog_selection == 0:
+                self.dialog_0()
+                self.reset_dialog()
+            elif self.game.dialog_selection == 1:
+                self.dialog_1()
+                self.reset_dialog()
+            else:
+                self.reset_dialog()
 
 
 class Obstacle(pg.sprite.Sprite):
@@ -319,6 +448,8 @@ class WeaponAnimation(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.image, self.rot)
         self.rect = self.image.get_rect()
         self.rect.center = self.game.camera.apply_pos(self.character.rect.center)
+        self.hit_rect = self.rect.copy()
+        self.hit_rect.center = self.rect.center
 
     @staticmethod
     def place_rect(angle):

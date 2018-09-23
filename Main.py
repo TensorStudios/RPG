@@ -112,6 +112,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.load_data()
+        self.draw_debug = False
 
     def load_data(self):
         # Load folder locations
@@ -158,10 +159,15 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.npcs = pg.sprite.Group()
         self.map = TiledMap(path.join(self.map_folder, "Map1.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
         self.show_inventory = False
+        self.dialog = False
+        self.dialog_selection = None
+        self.dialog_text = ""
+        self.dialog_options = []
 
         # Load map, spawn appropriate sprites
         for tile_object in self.map.tmxdata.objects:
@@ -172,6 +178,8 @@ class Game:
                 Mob(self, object_center.x, object_center.y)
             if tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+            if tile_object.name == "NPC":
+                NonPlayerCharacter(self, object_center.x, object_center.y)
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
@@ -197,7 +205,7 @@ class Game:
         self.all_sprites.update()
         self.camera.update(self.player)
 
-        # mobs hit player, if a mob runs into the player, knock playe back and deal damage to player
+        # mobs hit player, if a mob runs into the player, knock player back and deal damage to player
         hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
         for hit in hits:
             self.player.health -= MOB_DAMAGE
@@ -216,7 +224,7 @@ class Game:
 
     def open_inventory(self):
         if self.show_inventory:
-            self.draw_player_inventory(self.screen, 700, 150, self.player.inventory)
+            self.draw_player_inventory(self.screen, 750, 150, self.player.inventory)
 
     def draw_player_inventory(self, surf, x, y, inventory):
         box_height = 500
@@ -239,6 +247,39 @@ class Game:
             else:
                 self.draw_text(item, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 
+    def open_dialog(self):
+        if self.dialog:
+            self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
+
+    def draw_dialog(self, surf, message, options):
+        x = 100
+        y = 500
+        box_height = 250
+        box_width = 800
+        rect = pg.Rect(x, y, box_width, box_height)
+        outline_rect = pg.Rect(x, y, box_width, box_height)
+        options_rect = pg.Rect(x, y, box_width / 5, box_height)
+        pg.draw.rect(surf, BLACK, rect)
+        pg.draw.rect(surf, WHITE, outline_rect, 2)
+        pg.draw.rect(surf, WHITE, options_rect, 2)
+
+        text_height = 20
+
+        mouse = pg.mouse.get_pressed()
+
+        # Draw options
+        for position, option in enumerate(options):
+            rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
+            if rect.collidepoint(pg.mouse.get_pos()):
+                self.draw_text(option, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
+                if mouse[0]:
+                    self.dialog_selection = position
+            else:
+                self.draw_text(option, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
+
+        # Draw text
+        self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")
+
     def draw(self):
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
@@ -252,7 +293,11 @@ class Game:
         # Draw each sprite to the screen
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
-        # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
+            if self.draw_debug:
+                pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(sprite.hit_rect), 1)
+        if self.draw_debug:
+            for wall in self.walls:
+                pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(wall.rect), 1)
         if self.paused:
             self.screen.blit(self.dim_screen, (0, 0))
             self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 2,
@@ -263,6 +308,7 @@ class Game:
         draw_player_equip1(self.screen, 700, 10, 1)
         draw_player_equip2(self.screen, 830, 10, 1)
         self.open_inventory()
+        self.open_dialog()
 
         # Flip the screen
         pg.display.flip()
@@ -274,12 +320,17 @@ class Game:
                 self.quit()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    self.quit()
+                    self.show_inventory = False
+                    self.dialog = False
                 if event.key == pg.K_TAB:
                     self.paused = not self.paused
                 if event.key == pg.K_b:
                     # Show inventory
                     self.show_inventory = not self.show_inventory
+                if event.key == pg.K_h:
+                    self.draw_debug = not self.draw_debug
+                if event.key == pg.K_t:
+                    self.dialog = False
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)

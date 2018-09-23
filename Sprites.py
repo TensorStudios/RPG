@@ -1,5 +1,6 @@
 import pygame as pg
 import math
+from itertools import cycle
 
 from Settings import *
 
@@ -32,19 +33,68 @@ def collide_with_walls(sprite, group, dir):
             sprite.hit_rect.centery = sprite.pos.y
 
 
+class Spritesheet:
+    # utility class for loading and parsing sprites
+    def __init__(self, filename):
+        self.spritesheet = pg.image.load(filename).convert()
+
+    def get_image(self, x, y, width, height):
+        # grab an image out of a larger spritesheet
+        image = pg.Surface((width, height))
+        image.blit(self.spritesheet, (0, 0), (x, y, width, height))
+        return image
+
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = PLAYER_LAYER
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.images = {
+            "Walk_r_1": self.game.spritesheet_k_r.get_image(0, 0, 100, 100),
+            "Walk_r_2": self.game.spritesheet_k_r.get_image(100, 0, 100, 100),
+            "Walk_r_3": self.game.spritesheet_k_r.get_image(0, 100, 100, 100),
+            "Walk_r_4": self.game.spritesheet_k_r.get_image(100, 100, 100, 100),
+            "Walk_l_1": self.game.spritesheet_k_l.get_image(0, 0, 100, 100),
+            "Walk_l_2": self.game.spritesheet_k_l.get_image(100, 0, 100, 100),
+            "Walk_l_3": self.game.spritesheet_k_l.get_image(0, 100, 100, 100),
+            "Walk_l_4": self.game.spritesheet_k_l.get_image(100, 100, 100, 100),
+            "Attack_r_1": self.game.spritesheet_k_a_r.get_image(0, 0, 100, 100),
+            "Attack_r_2": self.game.spritesheet_k_a_r.get_image(100, 0, 100, 100),
+            "Attack_r_3": self.game.spritesheet_k_a_r.get_image(0, 100, 100, 100),
+            "Attack_r_4": self.game.spritesheet_k_a_r.get_image(100, 100, 100, 100),
+            "Attack_l_1": self.game.spritesheet_k_a_l.get_image(0, 0, 100, 100),
+            "Attack_l_2": self.game.spritesheet_k_a_l.get_image(100, 0, 100, 100),
+            "Attack_l_3": self.game.spritesheet_k_a_l.get_image(0, 100, 100, 100),
+            "Attack_l_4": self.game.spritesheet_k_a_l.get_image(100, 100, 100, 100),
+        }
+        self.walk_right = cycle([self.images["Walk_r_1"],
+                           self.images["Walk_r_2"],
+                           self.images["Walk_r_3"],
+                           self.images["Walk_r_4"]])
+        self.walk_left = cycle([self.images["Walk_l_1"],
+                           self.images["Walk_l_2"],
+                           self.images["Walk_l_3"],
+                           self.images["Walk_l_4"]])
+        self.attack_right = cycle([self.images["Attack_r_1"],
+                           self.images["Attack_r_2"],
+                           self.images["Attack_r_3"],
+                           self.images["Attack_r_4"]])
+        self.attack_left = cycle([self.images["Attack_l_1"],
+                           self.images["Attack_l_2"],
+                           self.images["Attack_l_3"],
+                           self.images["Attack_l_4"]])
+        self.image = self.walk_right.__next__()
+        self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
+        for image in self.images:
+            self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
         self.pos = vec(x, y)
+        self.facing = "R"
         self.direction = 270.0
         self.health = PLAYER_HEALTH
         self.last_attack = pg.time.get_ticks() - 150
@@ -52,6 +102,12 @@ class Player(pg.sprite.Sprite):
         self.attack_speed = WEAPON_SPEED
         self.damage = WEAPON_DAMAGE
         self.attacking = False
+        self.inventory = [
+            "Health",
+            "Health",
+            "Health"
+        ]
+        self.inventory_click_delay = pg.time.get_ticks()
 
     def attack(self):
         # Find mobs in range
@@ -65,7 +121,13 @@ class Player(pg.sprite.Sprite):
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
-            # print(f"Player Angle: {self.direction}")
+            # Character Attack Pose
+            if self.facing == "R":
+                self.image = self.attack_right.__next__()
+            else:
+                self.image = self.attack_left.__next__()
+            WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+
             for mob in mobs_in_range:
                 # Check if the mob is within the weapon arc
                 # largest degree
@@ -89,39 +151,27 @@ class Player(pg.sprite.Sprite):
                     if high_angle >= mob_angle >= low_angle:
                         # print("Hit")
                         mob.health -= WEAPON_DAMAGE
-                # else:
-                #     print("Not facing the right direction")
-                # print(f"High: {high_angle}, Mob angle: {mob_angle}, Low angle: {low_angle}")
-
-    def attack_animation(self):
-        # Find points of triangle
-        # Player's position, adjusted to camera
-        point1 = self.game.camera.apply_pos(self.pos)
-        # Other 2 points of the triangle, measure weapon distance away at the angle of attack
-        point2 = vec()
-        point3 = vec()
-        point2.from_polar((WEAPON_RANGE, self.direction + WEAPON_ARC))
-        point3.from_polar((WEAPON_RANGE, self.direction - WEAPON_ARC))
-        point2 += point1
-        point3 += point1
-        # Display on screen for 0.1 Seconds then toggle self.attacking to off
-        now = pg.time.get_ticks()
-        if now - 100 < self.last_attack:
-            pg.draw.polygon(self.game.screen, WHITE, [point1, point2, point3])
-        else:
-            self.attacking = False
 
     def get_keys(self):
+        self.rot_speed = 0
         self.vel = vec(0, 0)
+        movex = False
+        movey = False
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vel += vec(-PLAYER_SPEED, 0)
+            movex = True
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vel += vec(PLAYER_SPEED, 0)
+            movex = True
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.vel += vec(0, -PLAYER_SPEED)
+            movey = True
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel += vec(0, PLAYER_SPEED)
+            movey = True
+        if movex and movey:
+            self.vel *= 0.7071
         if keys[pg.K_SPACE]:
             self.attack()
 
@@ -131,9 +181,25 @@ class Player(pg.sprite.Sprite):
             self.direction = vec(0, 0).angle_to(self.vel.normalize())
             # print(self.direction)
 
+    def add_item(self, item):
+        if item in INVENTORY_TYPES:
+            self.inventory.append(item)
+        else:
+            print("Error, item doesn't exist")
+
+    def use_item(self, item):
+        now = pg.time.get_ticks()
+        if now - self.inventory_click_delay > CLICK_DELAY:
+            self.inventory_click_delay = now
+            used_item = self.inventory.pop(item)
+            if used_item == "Health":
+                self.health += 25
+                if self.health > PLAYER_HEALTH:
+                    self.health = PLAYER_HEALTH
+
     def update(self):
         self.get_keys()
-        self.get_direction()
+        self.direction = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
@@ -143,14 +209,40 @@ class Player(pg.sprite.Sprite):
         collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
 
+        # Animate character
+        now = pg.time.get_ticks()
+        if now >= self.walk_frame_time + SPRITE_FRAME_DELAY:
+            if self.vel != vec(0, 0):
+                if self.vel.x >= 0:
+                    self.facing = "R"
+                    if self.attacking:
+                        self.walk_frame_time = now
+                        self.image = self.attack_right.__next__()
+                    else:
+                        self.walk_frame_time = now
+                        self.image = self.walk_right.__next__()
+                else:
+                    self.facing = "L"
+                    if self.attacking:
+                        self.walk_frame_time = now
+                        self.image = self.attack_left.__next__()
+                    else:
+                        self.walk_frame_time = now
+                        self.image = self.walk_left.__next__()
+
 
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLACK)
+        self.images = {
+            "Zombie_r": self.game.spritesheet_z_r.get_image(0, 0, 100, 100),
+            "Zombie_l": self.game.spritesheet_z_l.get_image(0, 0, 100, 100)
+        }
+        for image in self.images:
+            self.images[image].set_colorkey(BG_SPRITE_COLOR)
+        self.image = self.images["Zombie_r"]
         self.rect = self.image.get_rect()
         self.hit_rect = MOB_HIT_RECT.copy()
         self.hit_rect.center = self.rect.center
@@ -165,8 +257,6 @@ class Mob(pg.sprite.Sprite):
         if self.health <= 0:
             self.kill()
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.acc = vec(MOB_SPEED, 0).rotate(-self.rot)
@@ -174,6 +264,10 @@ class Mob(pg.sprite.Sprite):
         self.vel += self.acc * self.game.dt
         self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
         self.hit_rect.centerx = self.pos.x
+        if self.vel.x >= 0:
+            self.image = self.images["Zombie_r"]
+        else:
+            self.image = self.images["Zombie_l"]
         collide_with_walls(self, self.game.walls, 'x')
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
@@ -205,3 +299,49 @@ class Wall(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+
+class WeaponAnimation(pg.sprite.Sprite):
+    def __init__(self, speed, rotation, type, game, character):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+
+        self.speed = speed
+        self.rot = rotation
+        self.frame = 0
+        self.frame_rate = 75
+        self.type = type
+        self.game = game
+        self.character = character
+        self.rot = -(self.character.direction - WEAPON_ARC + 90) % 360
+        self.last_update = pg.time.get_ticks()
+        self.image = self.game.weapon_animations[self.type]["Images"][0]
+        self.image = pg.transform.rotate(self.image, self.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.game.camera.apply_pos(self.character.rect.center)
+
+    @staticmethod
+    def place_rect(angle):
+        if 0 <= angle < 90:
+            return"TL"
+        elif 90 <= angle < 180:
+            return "TR"
+        elif 180 <= angle < 270:
+            return "BR"
+        elif 270 <= angle < 360:
+            return "BL"
+
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            if self.frame == len(self.game.weapon_animations[self.type]["Images"]):
+                self.character.attacking = False
+                self.kill()
+            else:
+                self.image = self.game.weapon_animations[self.type]["Images"][self.frame]
+                self.image = pg.transform.rotate(self.image, self.rot)
+                self.rect = self.image.get_rect()
+                self.rect.center = self.character.rect.center
+                self.frame += 1
+

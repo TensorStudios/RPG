@@ -104,6 +104,7 @@ def draw_player_equip2(surf, x, y, pct):
     pg.draw.rect(surf, WHITE, outline_rect, 2)
 
 
+
 class Game:
     def __init__(self):
         pg.init()
@@ -122,8 +123,35 @@ class Game:
         self.map = Map(path.join(game_folder, 'SBMap.txt'))
         self.map_img = None
         self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
+        self.inventory_font = path.join(img_folder, "coolvetica rg.ttf")
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
         self.dim_screen.fill((0, 0, 0, 180))
+
+        # Class variable initiation
+        self.mouse_dir = None
+
+        # Load Spritesheet image
+        self.spritesheet_k_r = Spritesheet(path.join(img_folder, "Knight.png"))
+        self.spritesheet_k_l = Spritesheet(path.join(img_folder, "Knight Left.png"))
+        self.spritesheet_k_a_r = Spritesheet(path.join(img_folder, "Knight Attack Pose.png"))
+        self.spritesheet_k_a_l = Spritesheet(path.join(img_folder, "Knight Attack Pose Left.png"))
+        self.spritesheet_aa_s = Spritesheet(path.join(img_folder, "Sword Attack Animation.png"))
+        self.spritesheet_z_r = Spritesheet(path.join(img_folder, "Zombie.png"))
+        self.spritesheet_z_l = Spritesheet(path.join(img_folder, "Zombie Left.png"))
+
+        self.weapon_animations = {
+            "sword": {
+                "Frame Rate": 100,
+                "Images": {
+                    0: self.spritesheet_aa_s.get_image(0, 0, 160, 160),
+                    1: self.spritesheet_aa_s.get_image(160, 0, 160, 160),
+                    2: self.spritesheet_aa_s.get_image(0, 160, 160, 160)
+                }
+            }
+        }
+        for weapon in self.weapon_animations:
+            for image in self.weapon_animations[weapon]["Images"]:
+                self.weapon_animations[weapon]["Images"][image].set_colorkey(BG_SPRITE_COLOR)
 
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -133,6 +161,7 @@ class Game:
         self.map = TiledMap(path.join(self.map_folder, "Map1.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
+        self.show_inventory = False
 
         # Load map, spawn appropriate sprites
         for tile_object in self.map.tmxdata.objects:
@@ -164,6 +193,7 @@ class Game:
 
     def update(self):
         # update portion of the game loop
+        self.mouse_dir = vec(self.camera.mouse_adjustment(pg.mouse.get_pos())) - vec(self.player.pos)
         self.all_sprites.update()
         self.camera.update(self.player)
 
@@ -183,6 +213,31 @@ class Game:
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
         for y in range(0, HEIGHT, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+
+    def open_inventory(self):
+        if self.show_inventory:
+            self.draw_player_inventory(self.screen, 700, 150, self.player.inventory)
+
+    def draw_player_inventory(self, surf, x, y, inventory):
+        box_height = 500
+        box_width = 250
+        rect = pg.Rect(x, y, box_width, box_height)
+        outline_rect = pg.Rect(x, y, box_width, box_height)
+        pg.draw.rect(surf, BLACK, rect)
+        pg.draw.rect(surf, WHITE, outline_rect, 2)
+
+        text_height = 25
+
+        mouse = pg.mouse.get_pressed()
+
+        for position, item in enumerate(inventory):
+            rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
+            if rect.collidepoint(pg.mouse.get_pos()):
+                self.draw_text(item, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
+                if mouse[0]:
+                    self.player.use_item(position)
+            else:
+                self.draw_text(item, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 
     def draw(self):
         # Set the caption of the game to be the current FPS
@@ -207,9 +262,7 @@ class Game:
         draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
         draw_player_equip1(self.screen, 700, 10, 1)
         draw_player_equip2(self.screen, 830, 10, 1)
-
-        # Draw player attack animation (only displays if recently attacked)
-        self.player.attack_animation()
+        self.open_inventory()
 
         # Flip the screen
         pg.display.flip()
@@ -224,6 +277,9 @@ class Game:
                     self.quit()
                 if event.key == pg.K_TAB:
                     self.paused = not self.paused
+                if event.key == pg.K_b:
+                    # Show inventory
+                    self.show_inventory = not self.show_inventory
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)

@@ -130,11 +130,11 @@
 </data>
  </layer>
  <objectgroup name="Objects">
-  <object id="1" name="Wall" x="1600" y="1280" width="640" height="64"/>
-  <object id="2" name="Wall" x="2240" y="1344" width="64" height="960"/>
-  <object id="5" name="Wall" x="1600" y="2304" width="704" height="64"/>
-  <object id="6" name="Wall" x="1536" y="1856" width="64" height="448"/>
-  <object id="8" name="Wall" x="1536" y="1280" width="64" height="448"/>
+  <object id="1" name="Wall" x="1600" y="1328" width="640" height="16"/>
+  <object id="2" name="Wall" x="2224" y="1344" width="16" height="960"/>
+  <object id="5" name="Wall" x="1600" y="2304" width="640" height="16"/>
+  <object id="6" name="Wall" x="1600" y="1856" width="16" height="448"/>
+  <object id="8" name="Wall" x="1600" y="1344" width="16" height="384"/>
   <object id="11" name="Player" x="1792" y="1792" width="64" height="64"/>
   <object id="12" name="Mob" x="1216" y="1536" width="64" height="64"/>
  </objectgroup>

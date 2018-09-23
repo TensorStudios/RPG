@@ -9,7 +9,7 @@ vec = pg.math.Vector2
 
 
 def collide_hit_rect(one, two):
-    return one.hit_rect.colliderect(two.rect)
+    return one.hit_rect.colliderect(two.hit_rect)
 
 
 def collide_with_walls(sprite, group, dir):
@@ -409,6 +409,7 @@ class Obstacle(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.rect = pg.Rect(x, y, w, h)
+        self.hit_rect = self.rect
         self.x = x
         self.y = y
         self.rect.x = x

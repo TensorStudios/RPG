@@ -1,17 +1,15 @@
 1. Added Player Inventory
     - Open and close by pressing "B"
     - Close by pressing ESC
-2. Fixed Janky Walls
-    - Completed wall objects on tiled map
-3. Attack towards mouse
+2. Attack towards mouse
     - Player attacks towards mouse with an arc of 90 degrees
-4. Basic player and enemy sprites
+3. Basic player and enemy sprites
     - Player sprite drawn and animated for moving left and right
     - Enemy sprite drawn (not animated) moving left and right
     - Player sprite animated for attack motion, in the direction of the mouse
-5. Complex loot
+4. Complex loot
     - Loot appears in player inventory when using self.player.add_item("ITEM") function
-6. NPCs
+5. NPCs
     - Added NPC that is interactive
     - Click on NPC when within 150 pixels
     - Dialog pops up from NPC
@@ -19,3 +17,12 @@
     - NPC adds item to player inventory
     - NPC has new dialog after giving item to player
     - Dialog can by closed by pressing "T" or ESC
+6. Map
+    - Added many trees, Mobs, to map
+    - Added NPC to map
+    - Added wall around map that is impassable
+
+Bug Fixes
+    - Wall clipping
+    - Player / Mob hit rect collisions
+    - Player / Mob __init__ rect spawn location

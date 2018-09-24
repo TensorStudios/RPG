@@ -111,6 +111,7 @@ class Player(pg.sprite.Sprite):
             "Health"
         ]
         self.inventory_click_delay = pg.time.get_ticks()
+        self.damage_time = pg.time.get_ticks()
 
     def update_frame(self, update=True):
         if update:
@@ -159,6 +160,12 @@ class Player(pg.sprite.Sprite):
                     if high_angle >= mob_angle >= low_angle:
                         # print("Hit")
                         mob.health -= WEAPON_DAMAGE
+
+    def take_damage(self, damage):
+        now = pg.time.get_ticks()
+        if now - self.damage_time >= PLAYER_DAMAGE_MITIGATION_TIME:
+            self.damage_time = now
+            self.health -= damage
 
     def get_keys(self):
         self.rot_speed = 0

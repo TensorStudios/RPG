@@ -22,6 +22,8 @@
     - Added many trees, Mobs, to map
     - Added NPC to map
     - Added wall around map that is impassable
+7. Player damage mitigation
+    - Player will only take damage if he has not taken damage in an amount of time equal to a variable in Settings
 
 Bug Fixes
     - Wall clipping

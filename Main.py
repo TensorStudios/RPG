@@ -208,7 +208,7 @@ class Game:
         # mobs hit player, if a mob runs into the player, knock player back and deal damage to player
         hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
         for hit in hits:
-            self.player.health -= MOB_DAMAGE
+            self.player.take_damage(MOB_DAMAGE)
             hit.vel = vec(0, 0)
             if self.player.health <= 0:
                 self.playing = False

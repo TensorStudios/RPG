@@ -3,6 +3,7 @@
     - Close by pressing ESC
 2. Attack towards mouse
     - Player attacks towards mouse with an arc of 90 degrees
+    - Player faces mouse direction
 3. Basic player and enemy sprites
     - Player sprite drawn and animated for moving left and right
     - Enemy sprite drawn (not animated) moving left and right

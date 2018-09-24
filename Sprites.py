@@ -69,23 +69,25 @@ class Player(pg.sprite.Sprite):
             "Attack_l_3": self.game.spritesheet_k_a_l.get_image(0, 100, 100, 100),
             "Attack_l_4": self.game.spritesheet_k_a_l.get_image(100, 100, 100, 100),
         }
-        self.walk_right = cycle([self.images["Walk_r_1"],
+        self.walk_cycle = cycle(range(4))
+        self.frame = 0
+        self.walk_right = [self.images["Walk_r_1"],
                            self.images["Walk_r_2"],
                            self.images["Walk_r_3"],
-                           self.images["Walk_r_4"]])
-        self.walk_left = cycle([self.images["Walk_l_1"],
+                           self.images["Walk_r_4"]]
+        self.walk_left = [self.images["Walk_l_1"],
                            self.images["Walk_l_2"],
                            self.images["Walk_l_3"],
-                           self.images["Walk_l_4"]])
-        self.attack_right = cycle([self.images["Attack_r_1"],
+                           self.images["Walk_l_4"]]
+        self.attack_right = [self.images["Attack_r_1"],
                            self.images["Attack_r_2"],
                            self.images["Attack_r_3"],
-                           self.images["Attack_r_4"]])
-        self.attack_left = cycle([self.images["Attack_l_1"],
+                           self.images["Attack_r_4"]]
+        self.attack_left = [self.images["Attack_l_1"],
                            self.images["Attack_l_2"],
                            self.images["Attack_l_3"],
-                           self.images["Attack_l_4"]])
-        self.image = self.walk_right.__next__()
+                           self.images["Attack_l_4"]]
+        self.image = self.walk_right[self.frame]
         self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
@@ -110,6 +112,11 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
 
+    def update_frame(self, update=True):
+        if update:
+            self.frame = self.walk_cycle.__next__()
+        return self.frame
+
     def attack(self):
         # Find mobs in range
         mobs_in_range = []
@@ -124,9 +131,9 @@ class Player(pg.sprite.Sprite):
             self.last_attack = now
             # Character Attack Pose
             if self.facing == "R":
-                self.image = self.attack_right.__next__()
+                self.image = self.attack_right[self.update_frame()]
             else:
-                self.image = self.attack_left.__next__()
+                self.image = self.attack_left[self.update_frame()]
             WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
 
             for mob in mobs_in_range:
@@ -215,23 +222,33 @@ class Player(pg.sprite.Sprite):
         # Animate character
         now = pg.time.get_ticks()
         if now >= self.walk_frame_time + SPRITE_FRAME_DELAY:
+            self.walk_frame_time = now
+            # Determine facing by mouse position
+            if 90 < self.direction < 270:
+                self.facing = "L"
+                self.image = self.walk_left[self.update_frame(False)]
+            else:
+                self.facing = "R"
+                self.image = self.walk_right[self.update_frame(False)]
+            # Animate movement if character is moving
             if self.vel != vec(0, 0):
-                if self.vel.x >= 0:
-                    self.facing = "R"
-                    if self.attacking:
-                        self.walk_frame_time = now
-                        self.image = self.attack_right.__next__()
+                if self.attacking:
+                    if self.facing == "R":
+                        self.image = self.attack_right[self.update_frame()]
                     else:
-                        self.walk_frame_time = now
-                        self.image = self.walk_right.__next__()
+                        self.image = self.attack_left[self.update_frame()]
                 else:
-                    self.facing = "L"
-                    if self.attacking:
-                        self.walk_frame_time = now
-                        self.image = self.attack_left.__next__()
+                    if self.facing == "R":
+                        self.image = self.walk_right[self.update_frame()]
                     else:
-                        self.walk_frame_time = now
-                        self.image = self.walk_left.__next__()
+                        self.image = self.walk_left[self.update_frame()]
+            # Animate attacking if character is attacking but standing still
+            else:
+                if self.attacking:
+                    if self.facing == "R":
+                        self.image = self.attack_right[self.update_frame(False)]
+                    else:
+                        self.image = self.attack_left[self.update_frame(False)]
 
 
 class Mob(pg.sprite.Sprite):

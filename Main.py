@@ -16,6 +16,7 @@ from Settings import *
 from Sprites import *
 from os import path
 from tilemap import *
+from NPC.NPC import *
 
 
 def text_objects(text, font):
@@ -179,7 +180,7 @@ class Game:
             if tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
             if tile_object.name == "NPC":
-                NonPlayerCharacter(self, object_center.x, object_center.y)
+                TestNPC(self, object_center.x, object_center.y)
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
@@ -273,7 +274,7 @@ class Game:
             if rect.collidepoint(pg.mouse.get_pos()):
                 self.draw_text(option, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
                 if mouse[0]:
-                    self.dialog_selection = position
+                    self.dialog_selection = option
             else:
                 self.draw_text(option, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 

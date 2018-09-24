@@ -15,6 +15,7 @@
     - Click on NPC when within 150 pixels
     - Dialog pops up from NPC
     - Options to reply to NPC
+    - Multiple screens when talking with NPC depending on option selected
     - NPC adds item to player inventory
     - NPC has new dialog after giving item to player
     - Dialog can by closed by pressing "T" or ESC

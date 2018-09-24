@@ -104,7 +104,6 @@ def draw_player_equip2(surf, x, y, pct):
     pg.draw.rect(surf, WHITE, outline_rect, 2)
 
 
-
 class Game:
     def __init__(self):
         pg.init()
@@ -121,7 +120,7 @@ class Game:
         self.map_folder = path.join(game_folder, "Maps")
 
         # Load game map
-        self.map = Map(path.join(game_folder, 'SBMap.txt'))
+        self.map = None
         self.map_img = None
         self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
         self.inventory_font = path.join(img_folder, "coolvetica rg.ttf")
@@ -168,6 +167,7 @@ class Game:
         self.dialog_selection = None
         self.dialog_text = ""
         self.dialog_options = []
+        self.pause_menu_selection = None
 
         # Load map, spawn appropriate sprites
         for tile_object in self.map.tmxdata.objects:
@@ -280,6 +280,57 @@ class Game:
         # Draw text
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")
 
+    def pause_menu(self):
+        self.screen.blit(self.dim_screen, (0, 0))
+        self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 4,
+                       align='center')
+
+        mouse = pg.mouse.get_pressed()
+        y = 350
+        spacing = 100
+
+        menu_options = {
+            0: "Save",
+            1: "Load",
+            2: "Main Menu",
+            3: "Resume"
+        }
+        for position, option in enumerate(menu_options):
+            rect = pg.Rect(0, y + (position * spacing) - (spacing / 2), WIDTH, spacing)
+            if rect.collidepoint(pg.mouse.get_pos()):
+                self.draw_text(menu_options[position], self.gameover_font, 50, BLUE, WIDTH / 2,
+                               y + (position * spacing), align="center")
+                if mouse[0]:
+                    self.pause_menu_selection = position
+            else:
+                self.draw_text(menu_options[position], self.gameover_font, 50, WHITE, WIDTH / 2,
+                               y + (position * spacing), align="center")
+
+        if self.pause_menu_selection == 0:
+            self.save_game()
+        elif self.pause_menu_selection == 1:
+            self.load_game()
+        elif self.pause_menu_selection == 2:
+            self.load_main_menu()
+        elif self.pause_menu_selection == 3:
+            self.resume_game()
+
+    def save_game(self):
+        self.pause_menu_selection = None
+        print("saved")
+
+    def load_game(self):
+        self.pause_menu_selection = None
+        print("loaded")
+
+    def load_main_menu(self):
+        self.pause_menu_selection = None
+        self.playing = False
+
+    def resume_game(self):
+        self.pause_menu_selection = None
+        self.paused = False
+
     def draw(self):
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
@@ -299,9 +350,8 @@ class Game:
             for wall in self.walls:
                 pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(wall.rect), 1)
         if self.paused:
-            self.screen.blit(self.dim_screen, (0, 0))
-            self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 2,
-                           align='center')
+            self.pause_menu()
+
         # HUD Functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
         draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
@@ -377,11 +427,12 @@ class Game:
             pg.display.update()
 
     def show_go_screen(self):
-        self.screen.fill(BLACK)
-        self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH / 2, HEIGHT / 2, align='center')
-        self.draw_text("Press Any Key", self.gameover_font, 75, WHITE, WIDTH / 2, HEIGHT * 3 / 4, align='center')
-        pg.display.flip()
-        self.wait_for_key()
+        if self.player.health <= 0:
+            self.screen.fill(BLACK)
+            self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH / 2, HEIGHT / 2, align='center')
+            self.draw_text("Press Any Key", self.gameover_font, 75, WHITE, WIDTH / 2, HEIGHT * 3 / 4, align='center')
+            pg.display.flip()
+            self.wait_for_key()
 
     def wait_for_key(self):
         pg.event.wait()

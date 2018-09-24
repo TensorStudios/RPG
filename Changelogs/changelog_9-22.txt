@@ -24,6 +24,10 @@
     - Added wall around map that is impassable
 7. Player damage mitigation
     - Player will only take damage if he has not taken damage in an amount of time equal to a variable in Settings
+8. Pause Menu
+    - Added functions to pause menu, Save, Load, Resume, Main Menu
+    - Main Menu and Resume work as expected
+    - Save and load will need a framework upgrade to make happen
 
 Bug Fixes
     - Wall clipping

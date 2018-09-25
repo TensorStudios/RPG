@@ -17,6 +17,7 @@ from Sprites import *
 from os import path
 from tilemap import *
 from NPC.NPC import *
+from NPC.Conversations import conversation_options
 
 
 def text_objects(text, font):
@@ -270,13 +271,16 @@ class Game:
 
         # Draw options
         for position, option in enumerate(options):
+            option_text = conversation_options["ID"][option]["Text"]
             rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
             if rect.collidepoint(pg.mouse.get_pos()):
-                self.draw_text(option, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
+                self.draw_text(option_text, self.inventory_font,
+                               20, BLUE, x + 5, y + 15 + (position * text_height), "w")
                 if mouse[0]:
                     self.dialog_selection = option
             else:
-                self.draw_text(option, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
+                self.draw_text(option_text, self.inventory_font,
+                               20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 
         # Draw text
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")

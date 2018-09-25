@@ -3,7 +3,7 @@ import math
 from itertools import cycle
 from Settings import *
 from Sprites import collide_with_walls, collide_hit_rect
-from NPC.Conversations import npc_conversations
+from NPC.Conversations import npc_conversations, conversation_options
 
 vec = pg.math.Vector2
 
@@ -34,8 +34,10 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.health = NPC_HEALTH
         self.click_delay = pg.time.get_ticks()
         self.active = False
-        self.dialog_step = "initial"
+        self.dialog_step = None
         self.id = 0
+        self.quest_id = None
+        self.dialog_shortcut = npc_conversations["Dialog ID"]
 
     def get_clicked(self):
         mouse = pg.mouse.get_pressed()
@@ -61,8 +63,10 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.active = False
 
     def get_dialog_text_and_options(self):
-        return npc_conversations["id"][self.id][self.dialog_step]["text"], \
-               npc_conversations["id"][self.id][self.dialog_step]["options"].keys()
+        text = self.dialog_shortcut[self.dialog_step]["Text"]
+        options = self.dialog_shortcut[self.dialog_step]["options"]
+
+        return text, options
 
     def handle_dialog(self, *args):
         pass
@@ -81,7 +85,7 @@ class TestNPC(NonPlayerCharacter):
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.id = 1
-        self.health_packs = 1
+        self.dialog_step = 1
 
     def dialog_text(self):
         text = ""
@@ -91,20 +95,16 @@ class TestNPC(NonPlayerCharacter):
 
         return text, options
 
-    def handle_dialog(self, *args):
-        args = args[0]
-        if "health" in args:
-            if self.health_packs > 0:
-                self.health_packs -= 1
-                self.game.player.add_item("Health")
-        if "explain" in args:
+    def handle_dialog(self, quest, conv_link, end_dialog, tags):
+        self.quest_id = quest
+        self.dialog_step = conv_link
+        if end_dialog:
+            self.reset_dialog()
+        else:
             self.reset_dialog()
             self.active = True
-        if "d_2" in args:
-            self.dialog_step = "d_2"
-        if "close" in args:
-            self.dialog_step = "d_3"
-            self.reset_dialog()
+        if "health" in tags:
+            self.game.player.add_item("Health")
 
     def update(self):
         self.get_clicked()
@@ -132,5 +132,7 @@ class TestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                self.handle_dialog(npc_conversations["id"][self.id][self.dialog_step]["options"]
-                                   [self.game.dialog_selection])
+                self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
+                                   conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
+                                   conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
+                                   conversation_options["ID"][self.game.dialog_selection]["Tags"])

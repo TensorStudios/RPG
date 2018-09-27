@@ -1,28 +1,22 @@
-# npc_conversations = {
-#     "id": {
-#         1: {
-#             "initial": {
-#                 "text": "It is dangerous to go alone, take this.",
-#                 "options": {
-#                     "Thanks": ["close", "health"],
-#                     "What is this?": ["explain", "d_2"]
-#                 }
-#             },
-#             "d_2": {
-#                 "text": "This healthpack will restore some life when used.",
-#                 "options": {
-#                     "Thanks": ["close", "health"]
-#                 }
-#             },
-#             "d_3": {
-#                 "text": "You already have my health pack, back off man",
-#                 "options": {
-#                     "...": ["close"]
-#                 }
-#             }
-#         }
-#     }
-# }
+"""
+Conversation data
+
+This closely resembles a .json filetype and could possibly become a database table
+
+npc_conversations
+ - The NPC will display dialog according to the Dialog ID
+ - The NPC ID isn't used in the code but helps to organize the data
+ - The Text is the NPC text
+ - The options refer to the corresponding option in conversation_options
+
+conversation_options
+ - The ID is referred to by the conversation
+ - The Quest ID links to the appropriate quest
+ - The Text is the option test
+ - End Dialog represents if the dialog is closed after the option is selected
+ - Tags are a list of strings that the NPC will handle
+
+"""
 
 npc_conversations = {
     "Dialog ID": {
@@ -100,7 +94,7 @@ conversation_options = {
             "Tags": [],
         },
         5: {
-            "Quest ID": 1,
+            "Quest ID": None,
             "Text": "Hell no",
             "Conversation Link ID": 5,
             "End Dialog": False,
@@ -115,27 +109,27 @@ conversation_options = {
         },
         7: {
             "Quest ID": 1,
-            "Text": "Working on it!'",
+            "Text": "On it!'",
             "Conversation Link ID": 6,
             "End Dialog": True,
             "Tags": [],
         },
         8: {
-            "Quest ID": 1,
-            "Text": "I've changed my mind",
+            "Quest ID": None,
+            "Text": "Nah...",
             "Conversation Link ID": 5,
             "End Dialog": False,
             "Tags": [],
         },
         9: {
-            "Quest ID": 1,
+            "Quest ID": None,
             "Text": "Thanks!",
             "Conversation Link ID": 8,
             "End Dialog": True,
             "Tags": ["quest complete"],
         },
         10: {
-            "Quest ID": 1,
+            "Quest ID": None,
             "Text": "No Problem",
             "Conversation Link ID": 8,
             "End Dialog": True,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextobjectid="81">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextobjectid="82">
  <tileset firstgid="1" source="Kenney_TDS.tsx"/>
  <layer name="Ground" width="60" height="60">
   <data encoding="csv">
@@ -135,9 +135,9 @@
   <object id="5" name="Wall" x="1600" y="2304" width="640" height="16"/>
   <object id="6" name="Wall" x="1600" y="1856" width="16" height="448"/>
   <object id="8" name="Wall" x="1600" y="1344" width="16" height="384"/>
-  <object id="11" name="Player" x="3072" y="2496" width="64" height="64"/>
+  <object id="11" name="Player" x="1792" y="1728" width="64" height="64"/>
   <object id="12" name="Mob" x="1216" y="1536" width="64" height="64"/>
-  <object id="13" name="NPC" x="1984" y="1472" width="64" height="64"/>
+  <object id="13" name="NPC" type="1" x="1984" y="1472" width="64" height="64"/>
   <object id="16" name="Mob" x="1216" y="1792" width="64" height="64"/>
   <object id="17" name="Mob" x="896" y="1536" width="64" height="64"/>
   <object id="18" name="Mob" x="1344" y="1088" width="64" height="64"/>
@@ -199,5 +199,6 @@
   <object id="78" name="Wall" x="0" y="3824" width="3840" height="16"/>
   <object id="79" name="Wall" x="3824" y="16" width="16" height="3808"/>
   <object id="80" name="Wall" x="0" y="16" width="16" height="3808"/>
+  <object id="81" name="NPC" type="2" x="1920" y="1920" width="64" height="64"/>
  </objectgroup>
 </map>

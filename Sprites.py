@@ -339,6 +339,7 @@ class Wall(pg.sprite.Sprite):
         self.rect.y = y * TILESIZE
 
 
+# Sprite for Animating weapon attacks
 class WeaponAnimation(pg.sprite.Sprite):
     def __init__(self, speed, rotation, type, game, character):
         self.groups = game.all_sprites

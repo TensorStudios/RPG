@@ -82,7 +82,7 @@ conversation_options = {
         3: {
             "Quest ID": None,
             "Text": "...",
-            "Conversation Link ID": None,
+            "Conversation Link ID": 3,
             "End Dialog": True,
             "Tags": [],
         },

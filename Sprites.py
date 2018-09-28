@@ -294,7 +294,7 @@ class Mob(pg.sprite.Sprite):
             self.kill()
         target_dist = self.target.pos - self.pos
         if target_dist.length_squared() < DETECT_RADIUS**2:
-        self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
+            self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
             # self.rect = self.image.get_rect()
             self.rect.center = self.pos
             self.acc = vec(1, 0).rotate(-self.rot)

@@ -166,7 +166,7 @@ class QuestNPC(NonPlayerCharacter):
     def quest_status(self):
         # Check status of quest id 1
         if self.quest_id == 1:
-            if len(self.game.mobs) == 9:
+            if len(self.game.mobs) == 0:
                 self.dialog_step = 7
                 Quests["Quest ID"][1]["Complete"] = True
 

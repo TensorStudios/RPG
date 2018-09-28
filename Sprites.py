@@ -280,6 +280,7 @@ class Mob(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = 0
         self.health = MOB_HEALTH
+        self.target = game.player
 
     def avoid_mobs(self):
         for mob in self.game.mobs:
@@ -291,24 +292,26 @@ class Mob(pg.sprite.Sprite):
     def update(self):
         if self.health <= 0:
             self.kill()
+        target_dist = self.target.pos - self.pos
+        if target_dist.length_squared() < DETECT_RADIUS**2:
         self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-        # self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        self.acc = vec(1, 0).rotate(-self.rot)
-        self.avoid_mobs()
-        self.acc.scale_to_length(MOB_SPEED)
-        self.acc += self.vel * -1
-        self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-        self.hit_rect.centerx = self.pos.x
-        if self.vel.x >= 0:
-            self.image = self.images["Zombie_r"]
-        else:
-            self.image = self.images["Zombie_l"]
-        collide_with_walls(self, self.game.walls, 'x')
-        self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.walls, 'y')
-        self.rect.center = self.hit_rect.center
+            # self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(1, 0).rotate(-self.rot)
+            self.avoid_mobs()
+            self.acc.scale_to_length(MOB_SPEED)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            self.hit_rect.centerx = self.pos.x
+            if self.vel.x >= 0:
+                self.image = self.images["Zombie_r"]
+            else:
+                self.image = self.images["Zombie_l"]
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center
 
 
 class Obstacle(pg.sprite.Sprite):

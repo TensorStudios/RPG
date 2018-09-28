@@ -54,6 +54,9 @@ class Camera:
     def apply_pos(self, pos):
         return pos + vec(self.camera.topleft)
 
+    def mouse_adjustment(self, mouse):
+        return vec(mouse) + vec(-self.camera.left, -self.camera.top)
+
     def update(self, target):
         x = -target.rect.x + int(WIDTH / 2)
         y = -target.rect.y + int(HEIGHT / 2)

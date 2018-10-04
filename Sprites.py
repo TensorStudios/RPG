@@ -289,6 +289,19 @@ class Mob(pg.sprite.Sprite):
                 if 0 < dist.length() < MOB_AVOID_RADIUS:
                     self.acc += dist.normalize()
 
+    @ staticmethod
+    def eight_directional_movement(direction):
+        if direction.x > 0:
+            if direction.y > 0:
+                return vec(1, 1)
+            else:
+                return vec(1, -1)
+        else:
+            if direction.y > 0:
+                return vec(-1, 1)
+            else:
+                return vec(-1, -1)
+
     def update(self):
         if self.health <= 0:
             self.kill()
@@ -297,7 +310,7 @@ class Mob(pg.sprite.Sprite):
             self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
             # self.rect = self.image.get_rect()
             self.rect.center = self.pos
-            self.acc = vec(1, 0).rotate(-self.rot)
+            self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
             self.avoid_mobs()
             self.acc.scale_to_length(MOB_SPEED)
             self.acc += self.vel * -1

@@ -1,0 +1,2 @@
+1. Restricted mob movement to only 8 directions
+2. Removed mob acceleration curve so that movement looks better

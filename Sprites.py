@@ -315,7 +315,8 @@ class Mob(pg.sprite.Sprite):
             self.acc.scale_to_length(MOB_SPEED)
             self.acc += self.vel * -1
             self.vel += self.acc * self.game.dt
-            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            # Commented out acceleration equation below
+            self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
             self.hit_rect.centerx = self.pos.x
             if self.vel.x >= 0:
                 self.image = self.images["Zombie_r"]

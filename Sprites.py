@@ -4,6 +4,9 @@ from itertools import cycle
 
 from Settings import *
 
+import random
+
+import time
 
 vec = pg.math.Vector2
 
@@ -312,7 +315,18 @@ class Mob(pg.sprite.Sprite):
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
-
+        else:
+            self.rect.center = self.pos
+            self.acc = vec(1, 0).rotate(-self.rot)
+            self.acc.scale_to_length(MOB_SPEED)
+            self.acc += self.vel * -1
+            self.vel += vec((8*random.random()-4), (8*random.random()-4))
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

@@ -14,11 +14,17 @@ import pygame as pg
 import sys
 from Settings import *
 from Sprites import *
-from os import path
+from os import path, chdir, getcwd
 from tilemap import *
 from NPC.NPC import *
 from NPC.Conversations import conversation_options
 from NPC.Quests import Quests
+
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return path.join(sys._MEIPASS, relative_path)
+    return path.join(path.abspath("."), relative_path)
 
 
 def text_objects(text, font):
@@ -41,7 +47,7 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
     else:
         pg.draw.rect(game.screen, ic, (x, y, w, h))
 
-    smallText = pg.font.Font("freesansbold.ttf", 30)
+    smallText = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 30)
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x + (w / 2)), (y + (h / 2)))
     game.screen.blit(textSurf, textRect)
@@ -118,15 +124,15 @@ class Game:
 
     def load_data(self):
         # Load folder locations
-        game_folder = path.dirname(__file__)
-        img_folder = path.join(game_folder, 'img')
-        self.map_folder = path.join(game_folder, "Maps")
+        game_folder = getcwd()
+        img_folder = resource_path(game_folder + '/img/')
+        self.map_folder = resource_path(game_folder + "/Maps/")
 
         # Load game map
         self.map = None
         self.map_img = None
-        self.gameover_font = path.join(img_folder, 'Game Over Font.TTF')
-        self.inventory_font = path.join(img_folder, "coolvetica rg.ttf")
+        self.gameover_font = resource_path(img_folder + 'Game Over Font.TTF')
+        self.inventory_font = resource_path(img_folder + "coolvetica rg.ttf")
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
         self.dim_screen.fill((0, 0, 0, 180))
 
@@ -134,13 +140,13 @@ class Game:
         self.mouse_dir = None
 
         # Load Spritesheet image for animations
-        self.spritesheet_k_r = Spritesheet(path.join(img_folder, "Knight.png"))
-        self.spritesheet_k_l = Spritesheet(path.join(img_folder, "Knight Left.png"))
-        self.spritesheet_k_a_r = Spritesheet(path.join(img_folder, "Knight Attack Pose.png"))
-        self.spritesheet_k_a_l = Spritesheet(path.join(img_folder, "Knight Attack Pose Left.png"))
-        self.spritesheet_aa_s = Spritesheet(path.join(img_folder, "Sword Attack Animation.png"))
-        self.spritesheet_z_r = Spritesheet(path.join(img_folder, "Zombie.png"))
-        self.spritesheet_z_l = Spritesheet(path.join(img_folder, "Zombie Left.png"))
+        self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
+        self.spritesheet_k_l = Spritesheet(resource_path(img_folder + "Knight Left.png"))
+        self.spritesheet_k_a_r = Spritesheet(resource_path(img_folder + "Knight Attack Pose.png"))
+        self.spritesheet_k_a_l = Spritesheet(resource_path(img_folder + "Knight Attack Pose Left.png"))
+        self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Sword Attack Animation.png"))
+        self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
+        self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
 
         self.weapon_animations = {
             "sword": {
@@ -162,7 +168,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
-        self.map = TiledMap(path.join(self.map_folder, "Map1.tmx"))
+        self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
         self.show_inventory = False
@@ -446,7 +452,7 @@ class Game:
                     pg.quit()
                     quit()
             self.screen.fill(DARKGREY)
-            largeText = pg.font.Font('freesansbold.ttf', 90)
+            largeText = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 90)
             TextSurf, TextRect = text_objects("Game Name TBD", largeText)
             TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
             self.screen.blit(TextSurf, TextRect)

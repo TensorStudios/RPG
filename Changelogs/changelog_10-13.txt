@@ -1,0 +1,21 @@
+Refactored code to be compatible with pyinstaller
+    1. Instead of using path.join() A new function was added at the head of Main.py called resource_path()
+    2. The application must get the current working directory and combine with the resource path to point to the
+        correct file in the output directory
+
+Steps to run and configure pyinstaller
+    1. Clone this repository: https://github.com/brentvollebregt/auto-py-to-exe
+    2. Update pip and all libraries (reference: https://stackoverflow.com/questions/15221473/how-do-i-update-pip-itself-from-inside-my-virtual-environment)
+    3. Run auto-py-to-exe's run.py
+    4. Select Main.py (or whatever the main code name is if we change it) as the script location
+    5. Select "One Directory"
+    6. Select "Window Based"
+    7. Select Icon (if applicable)
+    8. Add Folder for all resource folders, name the folder the same as it is in the code
+    9. Click Convert .PY to .EXE
+
+    If issues arise, export as a console based and run the program from the command prompt. Follow up with any
+    TraceBacks to fix the issue.
+
+    If the code doesn't export successfully as .exe, the best I have found is to search the error on google and do your
+    best to troubleshoot.

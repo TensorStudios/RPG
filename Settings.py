@@ -65,3 +65,6 @@ CLICK_DELAY = 500
 INVENTORY_TYPES = [
     "Health"
 ]
+
+# Items
+ITEM_IMAGES = {'health': 'health_pack.png'}

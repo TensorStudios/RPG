@@ -386,3 +386,12 @@ class WeaponAnimation(pg.sprite.Sprite):
                 self.rect.center = self.character.rect.center
                 self.frame += 1
 
+class Item(pg.sprite.Sprite):
+    def __init__(self, game, pos, type):
+        self.groups = game.all_sprites, game.items
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.item_images[type]
+        self.rect = self.image.get_rect()
+        self.type = type
+        self.rect.center = pos

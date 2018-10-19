@@ -133,6 +133,9 @@ class Game:
         # Class variable initiation
         self.mouse_dir = None
 
+        # health pack image
+        self.healthpack_img = path.join(img_folder, 'health_pack.png')
+
         # Load Spritesheet image for animations
         self.spritesheet_k_r = Spritesheet(path.join(img_folder, "Knight.png"))
         self.spritesheet_k_l = Spritesheet(path.join(img_folder, "Knight Left.png"))
@@ -156,6 +159,11 @@ class Game:
             for image in self.weapon_animations[weapon]["Images"]:
                 self.weapon_animations[weapon]["Images"][image].set_colorkey(BG_SPRITE_COLOR)
 
+        # #items
+        # self.item_images = {}
+        # for item in ITEM_IMAGES:
+        #     self.item_images[item] = pg.image.load(path.join(img_folder, ITEM_IMAGES[item])).convert_alpha()
+
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.Group()
@@ -171,6 +179,7 @@ class Game:
         self.dialog_text = ""
         self.dialog_options = []
         self.pause_menu_selection = None
+        self.items = pg.sprite.Group()
 
         # Load map, spawn appropriate sprites
         for tile_object in self.map.tmxdata.objects:

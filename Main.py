@@ -134,7 +134,8 @@ class Game:
         self.mouse_dir = None
 
         # health pack image
-        self.healthpack_img = path.join(img_folder, 'health_pack.png')
+        self.healthpack_img = pg.image.load(path.join(img_folder, 'health_pack.png'))
+        self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
 
         # Load Spritesheet image for animations
         self.spritesheet_k_r = Spritesheet(path.join(img_folder, "Knight.png"))
@@ -170,6 +171,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
+        self.items = pg.sprite.Group()
         self.map = TiledMap(path.join(self.map_folder, "Map1.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
@@ -179,7 +181,8 @@ class Game:
         self.dialog_text = ""
         self.dialog_options = []
         self.pause_menu_selection = None
-        self.items = pg.sprite.Group()
+        # self.healthpack = Item(self, (200, 200), "Health")
+
 
         # Load map, spawn appropriate sprites
         for tile_object in self.map.tmxdata.objects:
@@ -190,6 +193,8 @@ class Game:
                 Mob(self, object_center.x, object_center.y)
             if tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+            if tile_object.name == "Health":
+                Item(self, (object_center.x, object_center.y), tile_object.name)
             # check name: NPC and type for NPC ID
             # This could use a more elegant implementation because it will quickly get out of hand with many
             # NPC characters
@@ -234,6 +239,12 @@ class Game:
                 self.playing = False
         if hits:
             self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
+
+        #player hits item
+        hits = pg.sprite.spritecollide(self.player, self.items, False)
+        for hit in hits:
+            self.player.add_item(hit.type)
+            hit.kill()
 
     # Debug function to draw grid to screen
     def draw_grid(self):

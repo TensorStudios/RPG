@@ -38,7 +38,7 @@ WEAPON_ARC = 45
 
 # Mob Settings
 MOB_HIT_RECT = pg.Rect(0, 0, 35, 70)
-MOB_SPEED = 50
+MOB_SPEED = 0
 MOB_HEALTH = 100
 MOB_DAMAGE = 10
 MOB_KNOCKBACK = 20
@@ -52,6 +52,7 @@ SPEAK_RANGE = 125
 
 # Layers
 PLAYER_LAYER = 3
+ITEM_LAYER = 2
 ATTACK_LAYER = 2
 WALL_LAYER = 1
 
@@ -68,3 +69,6 @@ INVENTORY_TYPES = [
 
 # Items
 ITEM_IMAGES = {'health': 'health_pack.png'}
+
+# Item Drop Rate
+DROP_RATE = 0.5

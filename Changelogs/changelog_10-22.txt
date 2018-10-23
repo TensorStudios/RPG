@@ -1,0 +1,6 @@
+New Feature! Items
+
+1. Added item healthpack
+2. A healthpack spawns on the ground near the hero
+3. Healthpacks have a 50% change to drop from zombies
+4. Healthpacks are added to the player's inventory

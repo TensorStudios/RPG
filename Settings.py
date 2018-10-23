@@ -53,6 +53,7 @@ SPEAK_RANGE = 125
 
 # Layers
 PLAYER_LAYER = 3
+ITEM_LAYER = 2
 ATTACK_LAYER = 2
 WALL_LAYER = 1
 
@@ -66,3 +67,9 @@ CLICK_DELAY = 500
 INVENTORY_TYPES = [
     "Health"
 ]
+
+# Items
+ITEM_IMAGES = {'health': 'health_pack.png'}
+
+# Item Drop Rate
+DROP_RATE = 0.5

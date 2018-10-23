@@ -1,6 +1,7 @@
 import pygame as pg
 import math
 from itertools import cycle
+from random import random
 
 from Settings import *
 
@@ -304,6 +305,8 @@ class Mob(pg.sprite.Sprite):
 
     def update(self):
         if self.health <= 0:
+            if random() >= DROP_RATE:
+                Item(self.game, self.pos, "Health")
             self.kill()
         target_dist = self.target.pos - self.pos
         if target_dist.length_squared() < DETECT_RADIUS**2:
@@ -403,3 +406,13 @@ class WeaponAnimation(pg.sprite.Sprite):
                 self.rect.center = self.character.rect.center
                 self.frame += 1
 
+class Item(pg.sprite.Sprite):
+    def __init__(self, game, pos, type):
+        self._layer = ITEM_LAYER
+        self.groups = game.all_sprites, game.items
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.healthpack_img
+        self.rect = self.image.get_rect()
+        self.type = type
+        self.rect.center = pos

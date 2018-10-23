@@ -140,7 +140,7 @@ class Game:
         self.mouse_dir = None
 
         # health pack image
-        self.healthpack_img = pg.image.load(resource_path(img_folder + "health_pack.png")
+        self.healthpack_img = pg.image.load(resource_path(img_folder + "health_pack.png"))
         self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
 
         # Load Spritesheet image for animations

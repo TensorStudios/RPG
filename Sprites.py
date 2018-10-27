@@ -377,7 +377,7 @@ class WeaponAnimation(pg.sprite.Sprite):
         self.image = self.game.weapon_animations[self.type]["Images"][0]
         self.image = pg.transform.rotate(self.image, self.rot)
         self.rect = self.image.get_rect()
-        self.rect.center = self.game.camera.apply_pos(self.character.rect.center)
+        self.rect.center = self.character.rect.center
         self.hit_rect = self.rect.copy()
         self.hit_rect.center = self.rect.center
 

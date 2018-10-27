@@ -288,6 +288,9 @@ class Mob(pg.sprite.Sprite):
         self.health = MOB_HEALTH
         self.target = game.player
 
+        self.patrol_change = pg.time.get_ticks()
+        self.patrol_direction = random.randrange(0, 361)
+
     def avoid_mobs(self):
         for mob in self.game.mobs:
             if mob != self:
@@ -309,18 +312,12 @@ class Mob(pg.sprite.Sprite):
                 return vec(-1, -1)
 
     def patrol(self):
+        now = pg.time.get_ticks()
+        if now > self.patrol_change:
+            self.patrol_change = now + PATROL_CHANGE_TIME
+            self.patrol_direction = random.randrange(0, 361)
         self.rect.center = self.pos
-        self.pos += (2*random.random()-1, 2*random.random()-1)
-
-
-            # self.rect.center = self.pos
-            # self.vel = vec((random.random())-1, (random.random()))
-            # self.pos += self.vel
-            # self.hit_rect.centerx = self.pos.x
-            # collide_with_walls(self, self.game.walls, 'x')
-            # self.hit_rect.centery = self.pos.y
-            # collide_with_walls(self, self.game.walls, 'y')
-            # self.rect.center = self.hit_rect.center
+        self.rot = self.patrol_direction
 
     def update(self):
         if self.health <= 0:
@@ -332,28 +329,25 @@ class Mob(pg.sprite.Sprite):
             if target_dist.length_squared() < DETECT_RADIUS**2:
                 self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
                 # self.rect = self.image.get_rect()
-                self.rect.center = self.pos
-                self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
-                self.avoid_mobs()
-                self.acc.scale_to_length(MOB_SPEED)
-                self.acc += self.vel * -1
-                self.vel += self.acc * self.game.dt
-                # Commented out acceleration equation below
-                self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
-                self.hit_rect.centerx = self.pos.x
-                if self.vel.x >= 0:
-                    self.image = self.images["Zombie_r"]
-                else:
-                    self.image = self.images["Zombie_l"]
-                collide_with_walls(self, self.game.walls, 'x')
-                self.hit_rect.centery = self.pos.y
-                collide_with_walls(self, self.game.walls, 'y')
-                self.rect.center = self.hit_rect.center
             else:
-                pg.time.set_timer(timer, 1000)
-                for e in pg.event.get():
-                    if e.type == timer:
-                        self.patrol()
+                self.patrol()
+            self.rect.center = self.pos
+            self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
+            self.avoid_mobs()
+            self.acc.scale_to_length(MOB_SPEED)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            # Commented out acceleration equation below
+            self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
+            self.hit_rect.centerx = self.pos.x
+            if self.vel.x >= 0:
+                self.image = self.images["Zombie_r"]
+            else:
+                self.image = self.images["Zombie_l"]
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

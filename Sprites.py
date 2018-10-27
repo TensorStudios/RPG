@@ -1,10 +1,12 @@
 import pygame as pg
 import math
 from itertools import cycle
-from random import random
 
 from Settings import *
 
+import random
+
+import time
 
 vec = pg.math.Vector2
 
@@ -278,10 +280,15 @@ class Mob(pg.sprite.Sprite):
         self.pos = vec(x, y)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        self.x = 0
+        self.y = 0
         self.rect.center = self.pos
         self.rot = 0
         self.health = MOB_HEALTH
         self.target = game.player
+
+        self.patrol_change = pg.time.get_ticks()
+        self.patrol_direction = random.randrange(0, 361)
 
     def avoid_mobs(self):
         for mob in self.game.mobs:
@@ -303,15 +310,26 @@ class Mob(pg.sprite.Sprite):
             else:
                 return vec(-1, -1)
 
+    def patrol(self):
+        now = pg.time.get_ticks()
+        if now > self.patrol_change:
+            self.patrol_change = now + PATROL_CHANGE_TIME
+            self.patrol_direction = random.randrange(0, 361)
+        self.rect.center = self.pos
+        self.rot = self.patrol_direction
+
     def update(self):
         if self.health <= 0:
-            if random() >= DROP_RATE:
+            if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()
-        target_dist = self.target.pos - self.pos
-        if target_dist.length_squared() < DETECT_RADIUS**2:
-            self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-            # self.rect = self.image.get_rect()
+        else:
+            target_dist = self.target.pos - self.pos
+            if target_dist.length_squared() < DETECT_RADIUS**2:
+                self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
+                # self.rect = self.image.get_rect()
+            else:
+                self.patrol()
             self.rect.center = self.pos
             self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
             self.avoid_mobs()
@@ -329,7 +347,6 @@ class Mob(pg.sprite.Sprite):
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
-
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

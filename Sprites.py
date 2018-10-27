@@ -307,6 +307,20 @@ class Mob(pg.sprite.Sprite):
             else:
                 return vec(-1, -1)
 
+    def patrol(self):
+        self.rect.center = self.pos
+        self.pos += (2*random.random()-1, 2*random.random()-1)
+
+
+            # self.rect.center = self.pos
+            # self.vel = vec((random.random())-1, (random.random()))
+            # self.pos += self.vel
+            # self.hit_rect.centerx = self.pos.x
+            # collide_with_walls(self, self.game.walls, 'x')
+            # self.hit_rect.centery = self.pos.y
+            # collide_with_walls(self, self.game.walls, 'y')
+            # self.rect.center = self.hit_rect.center
+
     def update(self):
         if self.health <= 0:
             self.kill()
@@ -333,18 +347,10 @@ class Mob(pg.sprite.Sprite):
                 collide_with_walls(self, self.game.walls, 'y')
                 self.rect.center = self.hit_rect.center
             else:
-                self.rect.center = self.pos
-                self.acc = vec(10, 10)
-                self.vel = vec(.5, .5)
-                self.pos += self.vel
-                self.hit_rect.centerx = self.pos.x
-                collide_with_walls(self, self.game.walls, 'x')
-                self.hit_rect.centery = self.pos.y
-                collide_with_walls(self, self.game.walls, 'y')
-                self.rect.center = self.hit_rect.center
-
-            # A = pg.time.get_ticks()
-            # if pg.time.get_ticks() == (A + 2):
+                pg.time.set_timer(timer, 1000)
+                for e in pg.event.get():
+                    if e.type == timer:
+                        self.patrol()
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

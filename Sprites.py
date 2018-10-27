@@ -1,7 +1,6 @@
 import pygame as pg
 import math
 from itertools import cycle
-from random import random
 
 from Settings import *
 
@@ -288,6 +287,9 @@ class Mob(pg.sprite.Sprite):
         self.health = MOB_HEALTH
         self.target = game.player
 
+        self.patrol_change = pg.time.get_ticks()
+        self.patrol_direction = random.randrange(0, 361)
+
     def avoid_mobs(self):
         for mob in self.game.mobs:
             if mob != self:
@@ -308,9 +310,17 @@ class Mob(pg.sprite.Sprite):
             else:
                 return vec(-1, -1)
 
+    def patrol(self):
+        now = pg.time.get_ticks()
+        if now > self.patrol_change:
+            self.patrol_change = now + PATROL_CHANGE_TIME
+            self.patrol_direction = random.randrange(0, 361)
+        self.rect.center = self.pos
+        self.rot = self.patrol_direction
+
     def update(self):
         if self.health <= 0:
-            if random() >= DROP_RATE:
+            if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()
         else:
@@ -318,36 +328,26 @@ class Mob(pg.sprite.Sprite):
             if target_dist.length_squared() < DETECT_RADIUS**2:
                 self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
                 # self.rect = self.image.get_rect()
-                self.rect.center = self.pos
-                self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
-                self.avoid_mobs()
-                self.acc.scale_to_length(MOB_SPEED)
-                self.acc += self.vel * -1
-                self.vel += self.acc * self.game.dt
-                # Commented out acceleration equation below
-                self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
-                self.hit_rect.centerx = self.pos.x
-                if self.vel.x >= 0:
-                    self.image = self.images["Zombie_r"]
-                else:
-                    self.image = self.images["Zombie_l"]
-                collide_with_walls(self, self.game.walls, 'x')
-                self.hit_rect.centery = self.pos.y
-                collide_with_walls(self, self.game.walls, 'y')
-                self.rect.center = self.hit_rect.center
             else:
-                self.rect.center = self.pos
-                self.acc = vec(10, 10)
-                self.vel = vec(.5, .5)
-                self.pos += self.vel
-                self.hit_rect.centerx = self.pos.x
-                collide_with_walls(self, self.game.walls, 'x')
-                self.hit_rect.centery = self.pos.y
-                collide_with_walls(self, self.game.walls, 'y')
-                self.rect.center = self.hit_rect.center
+                self.patrol()
+            self.rect.center = self.pos
+            self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
+            self.avoid_mobs()
+            self.acc.scale_to_length(MOB_SPEED)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            # Commented out acceleration equation below
+            self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
+            self.hit_rect.centerx = self.pos.x
+            if self.vel.x >= 0:
+                self.image = self.images["Zombie_r"]
+            else:
+                self.image = self.images["Zombie_l"]
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center
 
-            # A = pg.time.get_ticks()
-            # if pg.time.get_ticks() == (A + 2):
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

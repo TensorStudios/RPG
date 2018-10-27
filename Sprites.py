@@ -1,7 +1,6 @@
 import pygame as pg
 import math
 from itertools import cycle
-from random import random
 
 from Settings import *
 
@@ -321,7 +320,7 @@ class Mob(pg.sprite.Sprite):
 
     def update(self):
         if self.health <= 0:
-            if random() >= DROP_RATE:
+            if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()
         else:

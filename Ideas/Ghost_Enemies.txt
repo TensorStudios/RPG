@@ -1,0 +1,29 @@
+Ghost Enemies:
+
+    def update(self):
+        if self.health <= 0:
+            self.kill()
+        else:
+            target_dist = self.target.pos - self.pos
+            if target_dist.length_squared() < DETECT_RADIUS**2:
+                self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
+                # self.rect = self.image.get_rect()
+                self.rect.center = self.pos
+                self.acc = self.eight_directional_movement(vec(1, 0).rotate(-self.rot))
+                self.avoid_mobs()
+                self.acc.scale_to_length(MOB_SPEED)
+                self.acc += self.vel * -1
+                self.vel += self.acc * self.game.dt
+                # Commented out acceleration equation below
+                self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
+                self.hit_rect.centerx = self.pos.x
+                if self.vel.x >= 0:
+                    self.image = self.images["Zombie_r"]
+                else:
+                    self.image = self.images["Zombie_l"]
+                collide_with_walls(self, self.game.walls, 'x')
+                self.hit_rect.centery = self.pos.y
+                collide_with_walls(self, self.game.walls, 'y')
+                self.rect.center = self.hit_rect.center
+            else:
+                self.rect.center = (10, 10)

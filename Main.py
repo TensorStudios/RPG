@@ -23,7 +23,7 @@ from NPC.Conversations import conversation_options
 from NPC.Quests import Quests
 
 
-logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.DEBUG,
+logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
                     format="%(asctime)s:%(levelname)s:%(message)s")
 
 
@@ -507,6 +507,7 @@ class Game:
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
+            self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.screen.fill(DARKGREY)
             largeText = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 90)
             TextSurf, TextRect = text_objects("Game Name TBD", largeText)

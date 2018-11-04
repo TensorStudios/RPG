@@ -1,12 +1,8 @@
 import pygame as pg
 import math
 from itertools import cycle
-
 from Settings import *
-
 import random
-
-import time
 
 vec = pg.math.Vector2
 

@@ -432,5 +432,6 @@ class Item(pg.sprite.Sprite):
         self.game = game
         self.image = game.healthpack_img
         self.rect = self.image.get_rect()
+        self.hit_rect = self.rect
         self.type = type
         self.rect.center = pos

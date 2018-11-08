@@ -18,6 +18,52 @@ conversation_options
 
 """
 
+NPC_id: {
+    1: {
+        "Dialog ID": {
+            1: {
+                "Text": "It's dangerous to go alone, take this",
+                "Options": {
+                    1: {
+                        "Text": "Thanks",
+                        "Link": 3,
+                        "Tags": ["Health"],
+                        "End Dialog": True
+                    },
+                    2: {
+                        "Text": "What is this?",
+                        "Link": 2,
+                        "Tags": [],
+                        "End Dialog": False
+                    }
+                }
+            },
+            2: {
+                "Text": "This healthpack will restore some life when used.",
+                "Options": {
+                    1: {
+                        "Text": "Thanks",
+                        "Link": 3,
+                        "Tags": ["Health"],
+                        "End Dialog": False
+                    }
+                }
+            },
+            3: {
+                "Text": "You already have my healthpack, back off man",
+                "Options": {
+                    1: {
+                        "Text": ". . .",
+                        "Link": 3,
+                        "Tags": [],
+                        "End Dialog": True
+                    }
+                }
+            }
+        }
+    }
+}
+
 npc_conversations = {
     "Dialog ID": {
         1: {

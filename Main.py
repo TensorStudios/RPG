@@ -10,6 +10,8 @@ Devin Emnett
 
 """
 
+import logging
+import datetime
 import pygame as pg
 import sys
 from Settings import *
@@ -19,6 +21,10 @@ from tilemap import *
 from NPC.NPC import *
 from NPC.Conversations import conversation_options
 from NPC.Quests import Quests
+
+
+logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
+                    format="%(asctime)s:%(levelname)s:%(message)s")
 
 
 def resource_path(relative_path):
@@ -40,8 +46,10 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
         pg.draw.rect(game.screen, ac, (x, y, w, h))
         if click[0] == 1 and action != None:
             if action == "play":
+                logging.info("Play button pressed")
                 game.intro = False
             elif action == "quit":
+                logging.info("Quit Button Pressed")
                 pg.quit()
                 quit()
     else:
@@ -115,6 +123,7 @@ def draw_player_equip2(surf, x, y, pct):
 
 class Game:
     def __init__(self):
+        logging.debug("Initializing Game")
         pg.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
@@ -123,6 +132,7 @@ class Game:
         self.draw_debug = False
 
     def load_data(self):
+        logging.info("Loading Game")
         # Load folder locations
         game_folder = getcwd()
         img_folder = resource_path(game_folder + '/img/')
@@ -131,8 +141,10 @@ class Game:
         # Load game map
         self.map = None
         self.map_img = None
+        logging.debug("loading Fonts")
         self.gameover_font = resource_path(img_folder + 'Game Over Font.TTF')
         self.inventory_font = resource_path(img_folder + "coolvetica rg.ttf")
+        logging.debug("success")
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
         self.dim_screen.fill((0, 0, 0, 180))
 
@@ -140,10 +152,13 @@ class Game:
         self.mouse_dir = None
 
         # health pack image
-        self.healthpack_img = pg.image.load(resource_path(img_folder + "health_pack.png"))
+        logging.debug("loading healthpack img")
+        self.healthpack_img = pg.image.load(resource_path(img_folder + "health_pack.png")).convert()
         self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
+        logging.debug("success")
 
         # Load Spritesheet image for animations
+        logging.debug("loading spritesheet imgs")
         self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
         self.spritesheet_k_l = Spritesheet(resource_path(img_folder + "Knight Left.png"))
         self.spritesheet_k_a_r = Spritesheet(resource_path(img_folder + "Knight Attack Pose.png"))
@@ -165,17 +180,23 @@ class Game:
         for weapon in self.weapon_animations:
             for image in self.weapon_animations[weapon]["Images"]:
                 self.weapon_animations[weapon]["Images"][image].set_colorkey(BG_SPRITE_COLOR)
+        logging.debug("Success")
+        logging.info("Successfully loaded all data")
 
     def new(self):
         # initialize all variables and do all the setup for a new game
+        logging.info("Loading New game settings")
+        logging.info("Creating sprite groups")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        logging.info("Loading map")
         self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
+        logging.info("reseting class variables")
         self.show_inventory = False
         self.dialog = False
         self.dialog_selection = None
@@ -184,23 +205,30 @@ class Game:
         self.pause_menu_selection = None
 
         # Load map, spawn appropriate sprites
+        logging.info("Placing sprites and objects on map")
         for tile_object in self.map.tmxdata.objects:
             object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
             if tile_object.name == "Player":
                 self.player = Player(self, object_center.x, object_center.y)
+                logging.debug("Placing Player Sprite")
             if tile_object.name == "Mob":
                 Mob(self, object_center.x, object_center.y)
+                logging.debug("Placing Mob Sprite")
             if tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+                logging.debug("Placing Obstacle sprite")
             if tile_object.name == "Health":
                 Item(self, (object_center.x, object_center.y), tile_object.name)
+                logging.debug("Placing Item Sprite")
             # check name: NPC and type for NPC ID
             # This could use a more elegant implementation because it will quickly get out of hand with many
             # NPC characters
             if tile_object.name == "NPC" and tile_object.type == "1":
                 TestNPC(self, object_center.x, object_center.y)
+                logging.debug("Placing NPC Sprite")
             if tile_object.name == "NPC" and tile_object.type == "2":
                 QuestNPC(self, object_center.x, object_center.y)
+                logging.debug("Placing NPC Sprite")
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
@@ -208,6 +236,7 @@ class Game:
 
     def run(self):
         # game loop - set self.playing = False to end the game
+        logging.info("Run main game")
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
@@ -217,11 +246,13 @@ class Game:
             self.draw()
 
     def quit(self):
+        logging.warning("Quitting Game")
         pg.quit()
         sys.exit()
 
     def update(self):
         # update portion of the game loop
+        logging.debug("Calculating Update Loop")
 
         # Get the direction of the mouse relative to the character
         self.mouse_dir = vec(self.camera.mouse_adjustment(pg.mouse.get_pos())) - vec(self.player.pos)
@@ -255,6 +286,7 @@ class Game:
     # Trigger inventory screen
     def open_inventory(self):
         if self.show_inventory:
+            logging.info("Inventory Open")
             self.draw_player_inventory(self.screen, 750, 150, self.player.inventory)
 
     # Draw inventory on screen
@@ -284,6 +316,7 @@ class Game:
     # Trigger dialog
     def open_dialog(self):
         if self.dialog:
+            logging.info("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
 
     # Draw dialog
@@ -322,6 +355,7 @@ class Game:
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")
 
     def pause_menu(self):
+        logging.info("Game paused")
         self.screen.blit(self.dim_screen, (0, 0))
         self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 4,
                        align='center')
@@ -362,25 +396,28 @@ class Game:
     # Placeholder for game save
     def save_game(self):
         self.pause_menu_selection = None
-        print("saved")
+        logging.info("Game Saved")
 
     # Placeholder for game load
     def load_game(self):
         self.pause_menu_selection = None
-        print("loaded")
+        logging.info("Game Loaded")
 
     # Go to main menu, resets game
     # Can also resume game from where pause screen was
     def load_main_menu(self):
         self.pause_menu_selection = None
         self.playing = False
+        logging.info("Loading Main Menu")
 
     # Resume game
     def resume_game(self):
         self.pause_menu_selection = None
         self.paused = False
+        logging.info("Resuming Game")
 
     def draw(self):
+        logging.debug("Drawing to screen")
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
@@ -421,17 +458,22 @@ class Game:
                 if event.key == pg.K_ESCAPE:
                     self.show_inventory = False
                     self.dialog = False
+                    logging.debug("ESC Pressed")
                 if event.key == pg.K_TAB:
                     self.paused = not self.paused
+                    logging.debug("Tab Pressed")
                 if event.key == pg.K_b:
                     # Show inventory
                     self.show_inventory = not self.show_inventory
+                    logging.debug("b pressed")
                 if event.key == pg.K_h:
                     # Show rects
                     self.draw_debug = not self.draw_debug
+                    logging.debug("h pressed")
                 if event.key == pg.K_t:
                     # Close dialog if it is open
                     self.dialog = False
+                    logging.debug("t pressed")
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)
@@ -458,12 +500,14 @@ class Game:
         self.screen.blit(text_surface, text_rect)
 
     def show_start_screen(self):
+        logging.info("Show start screen")
         self.intro = True
         while self.intro:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
+            self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.screen.fill(DARKGREY)
             largeText = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 90)
             TextSurf, TextRect = text_objects("Game Name TBD", largeText)
@@ -478,6 +522,7 @@ class Game:
             pg.display.update()
 
     def show_go_screen(self):
+        logging.info("Show game over screen")
         if self.player.health <= 0:
             self.screen.fill(BLACK)
             self.draw_text("YOU DIED", self.gameover_font, 100, WHITE, WIDTH / 2, HEIGHT / 2, align='center')
@@ -501,7 +546,11 @@ class Game:
 # create the game object
 g = Game()
 while True:
+    logging.info("Calling Start Screen")
     g.show_start_screen()
+    logging.info("Calling New game")
     g.new()
+    logging.info("Callilng Game loop")
     g.run()
+    logging.info("Calling Game over screen")
     g.show_go_screen()

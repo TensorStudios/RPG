@@ -1,8 +1,10 @@
+import logging
 import pygame as pg
 import math
 from itertools import cycle
 from Settings import *
 import random
+import time
 
 vec = pg.math.Vector2
 
@@ -111,6 +113,10 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
+        logging.info("Player Character Created")
+
+    def __str__(self):
+        return "Player Character"
 
     def update_frame(self, update=True):
         if update:
@@ -129,11 +135,13 @@ class Player(pg.sprite.Sprite):
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
+            logging.info("player attacks")
             # Character Attack Pose
             if self.facing == "R":
                 self.image = self.attack_right[self.update_frame()]
             else:
                 self.image = self.attack_left[self.update_frame()]
+            logging.debug("spawning weapon animation")
             WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
 
             for mob in mobs_in_range:
@@ -149,6 +157,7 @@ class Player(pg.sprite.Sprite):
 
                 # See if the mob angle is within the two angles
                 if high_angle >= mob_angle >= low_angle:
+                    logging.debug("hit connects")
                     mob.health -= WEAPON_DAMAGE
                     # print("Hit")
                 # account for if the mob is at a high angle and high_angle is at a low value
@@ -157,12 +166,13 @@ class Player(pg.sprite.Sprite):
                         mob_angle -= 360
                     low_angle -= 360
                     if high_angle >= mob_angle >= low_angle:
-                        # print("Hit")
+                        logging.debug("hit connects")
                         mob.health -= WEAPON_DAMAGE
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
         if now - self.damage_time >= PLAYER_DAMAGE_MITIGATION_TIME:
+            logging.info(f"Player takes {damage} damage")
             self.damage_time = now
             self.health -= damage
 
@@ -193,11 +203,12 @@ class Player(pg.sprite.Sprite):
         # find what direction the player is facing
         if self.vel != vec(0, 0):
             self.direction = vec(0, 0).angle_to(self.vel.normalize())
-            # print(self.direction)
+            logging.debug(f"player facing {self.direction}")
 
     def add_item(self, item):
         if item in INVENTORY_TYPES:
             self.inventory.append(item)
+            logging.info(f"{item} added to inventory")
         else:
             print("Error, item doesn't exist")
 
@@ -285,6 +296,11 @@ class Mob(pg.sprite.Sprite):
 
         self.patrol_change = pg.time.get_ticks()
         self.patrol_direction = random.randrange(0, 361)
+        self.spawn_number = len(self.game.mobs)
+        logging.info(f"Created Mob {self.spawn_number}")
+
+    def __str__(self):
+        return f"Mob {self.spawn_number}"
 
     def avoid_mobs(self):
         for mob in self.game.mobs:
@@ -315,6 +331,7 @@ class Mob(pg.sprite.Sprite):
         self.rot = self.patrol_direction
 
     def update(self):
+        logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
             if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")

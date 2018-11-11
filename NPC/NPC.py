@@ -3,7 +3,7 @@ import math
 from itertools import cycle
 from Settings import *
 from Sprites import collide_with_walls, collide_hit_rect
-from NPC.Conversations import npc_conversations, conversation_options
+from NPC.Conversations import NPC_id
 from NPC.Quests import Quests
 
 vec = pg.math.Vector2
@@ -39,7 +39,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.dialog_step = None
         self.id = 0
         self.quest_id = None
-        self.dialog_shortcut = npc_conversations["Dialog ID"]
+        self.dialog_shortcut = NPC_id[self.id]
 
     # Check if the NPC was clicked and the player is close enough. Also checks if the player has walked away
     def get_clicked(self):
@@ -69,7 +69,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
     # Used by main.py to get the text and options to display
     def get_dialog_text_and_options(self):
         text = self.dialog_shortcut[self.dialog_step]["Text"]
-        options = self.dialog_shortcut[self.dialog_step]["options"]
+        options = self.dialog_shortcut[self.dialog_step]["Options"]
 
         return text, options
 
@@ -104,7 +104,7 @@ class TestNPC(NonPlayerCharacter):
         else:
             self.reset_dialog()
             self.active = True
-        if "health" in tags:
+        if "Health" in tags:
             self.game.player.add_item("Health")
 
     def update(self):
@@ -133,6 +133,7 @@ class TestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
+                self.handle_dialog()
                 self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
                                    conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
                                    conversation_options["ID"][self.game.dialog_selection]["End Dialog"],

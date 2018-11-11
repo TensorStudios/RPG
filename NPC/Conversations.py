@@ -1,5 +1,3 @@
-import NPC.Quests
-
 """
 Conversation data
 
@@ -24,6 +22,7 @@ NPC_id: {
     1: {
         "Dialog ID": {
             1: {
+                "Quest_ID": None,
                 "Text": "It's dangerous to go alone, take this",
                 "Options": {
                     1: {
@@ -41,6 +40,7 @@ NPC_id: {
                 }
             },
             2: {
+                "Quest_ID": None,
                 "Text": "This healthpack will restore some life when used.",
                 "Options": {
                     1: {
@@ -52,6 +52,7 @@ NPC_id: {
                 }
             },
             3: {
+                "Quest_ID": None,
                 "Text": "You already have my healthpack, back off man",
                 "Options": {
                     1: {
@@ -67,6 +68,7 @@ NPC_id: {
     2: {
         "Dialog ID": {
             1: {
+                "Quest_ID": 0,
                 "Text": "Would you kindly remove these Zombies?",
                 "Options": {
                     1: {
@@ -84,6 +86,7 @@ NPC_id: {
                 }
             },
             2: {
+                "Quest_ID": 0,
                 "Text": "What are you waiting for?",
                 "Options": {
                     1: {
@@ -101,6 +104,7 @@ NPC_id: {
                 }
             },
             3: {
+                "Quest_ID": 0,
                 "Text": "If you change your mind, talk to me again",
                 "Options": {
                     "Text": "Ok",
@@ -111,6 +115,7 @@ NPC_id: {
                 }
             },
             4: {
+                "Quest_ID": 0,
                 "Text": "Great job. Here is your reward",
                 "Options": {
                     1: {
@@ -122,6 +127,7 @@ NPC_id: {
                 }
             },
             5: {
+                "Quest_ID": None,
                 "Text": "Thanks for solving our problem",
                 "Options": {
                     1: {

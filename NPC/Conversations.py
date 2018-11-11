@@ -1,24 +1,5 @@
-"""
-Conversation data
 
-This closely resembles a .json filetype and could possibly become a database table
-
-npc_conversations
- - The NPC will display dialog according to the Dialog ID
- - The NPC ID isn't used in the code but helps to organize the data
- - The Text is the NPC text
- - The options refer to the corresponding option in conversation_options
-
-conversation_options
- - The ID is referred to by the conversation
- - The Quest ID links to the appropriate quest
- - The Text is the option test
- - End Dialog represents if the dialog is closed after the option is selected
- - Tags are a list of strings that the NPC will handle
-
-"""
-
-NPC_id: {
+NPC_id = {
     1: {
         "Dialog ID": {
             1: {

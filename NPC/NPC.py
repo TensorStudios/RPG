@@ -11,7 +11,7 @@ vec = pg.math.Vector2
 
 # Master class for NPC
 class NonPlayerCharacter(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, ID):
         self.groups = game.all_sprites, game.npcs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -37,9 +37,9 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.click_delay = pg.time.get_ticks()
         self.active = False
         self.dialog_step = None
-        self.id = 0
+        self.id = ID
         self.quest_id = None
-        self.dialog_shortcut = NPC_id[self.id]
+        self.dialog_shortcut = NPC_id[self.id]["Dialog ID"]
 
     # Check if the NPC was clicked and the player is close enough. Also checks if the player has walked away
     def get_clicked(self):
@@ -133,24 +133,25 @@ class TestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                self.handle_dialog()
-                self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Tags"])
+                self.handle_dialog(NPC_id[self.id][self.dialog_step]["Quest_ID"],
+                                   NPC_id[self.id][self.dialog_step][""])
+                # self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
+                #                    conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
+                #                    conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
+                #                    conversation_options["ID"][self.game.dialog_selection]["Tags"])
 
 
 class QuestNPC(NonPlayerCharacter):
-    def __init__(self, game, x, y):
-        NonPlayerCharacter.__init__(self, game, x, y)
+    def __init__(self, game, x, y, ID):
+        NonPlayerCharacter.__init__(self, game, x, y, ID)
         self.images = {
             "NPC_r": self.game.spritesheet_k_r.get_image(0, 0, 100, 100)
         }
         self.image = self.images["NPC_r"]
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
-        self.id = 2
-        self.dialog_step = 4
+        self.id = ID
+        self.dialog_step = 1
 
     def handle_dialog(self, quest, conv_link, end_dialog, tags):
         self.quest_id = quest
@@ -196,11 +197,15 @@ class QuestNPC(NonPlayerCharacter):
         self.quest_status()
 
         if self.active:
+            # If this NPC has been clicked, but not options have been selected, tell the game what to display
             if self.game.dialog_selection is None:
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Tags"])
+                # Handle the consequences of the dialog action
+                print(self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Link"])
+                self.handle_dialog(self.dialog_shortcut[self.dialog_step]["Quest_ID"],
+                                   self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Link"],
+                                   self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["End Dialog"],
+                                   self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Tags"],
+                                   )

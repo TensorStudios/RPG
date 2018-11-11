@@ -18,8 +18,10 @@ from Settings import *
 from Sprites import *
 from os import path, chdir, getcwd
 from tilemap import *
-from NPC.NPC import *
-from NPC.Conversations import conversation_options
+# Trying to import NPC_id from NPC.Conversations??????
+from NPC.NPC import QuestNPC
+from NPC.Conversations import NPC_id
+# from NPC.Conversations import conversation_options
 from NPC.Quests import Quests
 
 
@@ -224,10 +226,10 @@ class Game:
             # This could use a more elegant implementation because it will quickly get out of hand with many
             # NPC characters
             if tile_object.name == "NPC" and tile_object.type == "1":
-                TestNPC(self, object_center.x, object_center.y)
+                QuestNPC(self, object_center.x, object_center.y, ID=1)
                 logging.debug("Placing NPC Sprite")
             if tile_object.name == "NPC" and tile_object.type == "2":
-                QuestNPC(self, object_center.x, object_center.y)
+                QuestNPC(self, object_center.x, object_center.y, ID=2)
                 logging.debug("Placing NPC Sprite")
 
         # Create the camera object
@@ -337,8 +339,8 @@ class Game:
         mouse = pg.mouse.get_pressed()
 
         # Draw options
-        for position, option in enumerate(options):
-            option_text = conversation_options["ID"][option]["Text"]
+        for position, option in options.items():
+            option_text = option["Text"]
             rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
             if rect.collidepoint(pg.mouse.get_pos()):

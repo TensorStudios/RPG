@@ -203,7 +203,9 @@ class QuestNPC(NonPlayerCharacter):
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
                 # Handle the consequences of the dialog action
-                print(self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Link"])
+                # print(self.game.dialog_selection)
+                # print(self.dialog_shortcut[self.dialog_step]["Options"])
+                # print(self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Link"])
                 self.handle_dialog(self.dialog_shortcut[self.dialog_step]["Quest_ID"],
                                    self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["Link"],
                                    self.dialog_shortcut[self.dialog_step]["Options"][self.game.dialog_selection]["End Dialog"],

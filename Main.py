@@ -341,17 +341,17 @@ class Game:
         # Draw options
         for position, option in options.items():
             option_text = option["Text"]
-            rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
+            rect = pg.Rect(x + 5, y + 5 + (position * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
             if rect.collidepoint(pg.mouse.get_pos()):
                 self.draw_text(option_text, self.inventory_font,
-                               20, BLUE, x + 5, y + 15 + (position * text_height), "w")
+                               20, BLUE, x + 5, y + (position * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC
                 if mouse[0]:
-                    self.dialog_selection = option
+                    self.dialog_selection = option["Link"]
             else:
                 self.draw_text(option_text, self.inventory_font,
-                               20, WHITE, x + 5, y + 15 + (position * text_height), "w")
+                               20, WHITE, x + 5, y + (position * text_height), "w")
 
         # Draw text
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")

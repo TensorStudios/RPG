@@ -10,7 +10,7 @@ Information on quests, can be altered by NPCs in  the game
 
 Quests = {
     "Quest ID": {
-        0: {
+        1: {
             "Available": True,
             "Status": "Not started",
             "Linked Quest": None,
@@ -24,7 +24,7 @@ Quests = {
             },
             "Reward": "Health",
         },
-        1: {
+        2: {
             "Available": False,
             "Status": "Not started",
             "Linked Quest": 1,

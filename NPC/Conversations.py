@@ -1,4 +1,23 @@
+"""
 
+NPC_id data represents a .json filetype and will be upgraded in a future commit to take advantage of that
+
+The structure goes as such
+
+NPC_id (The ID of the NPC referred to)
+    - Dialog ID (What step of the conversation are we at)
+        - Quest_ID (None if there is no quest associated, otherwise it is the ID of the quest)
+        - Text (What the NPC is saying
+        - Options (Options the player can get)
+            - Option 1 (Must be an int())
+                - Text (of the option)
+                - Link (to the next dialog id)
+                - Tags (what happens when this option is chosen if there is anything more than progressing to another
+                dialog id)
+                - End Dialog (Does this end the dialog screen with the NPC)
+
+
+"""
 NPC_id = {
     1: {
         "Dialog ID": {

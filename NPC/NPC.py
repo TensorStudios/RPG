@@ -85,63 +85,6 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         pass
 
 
-class TestNPC(NonPlayerCharacter):
-    def __init__(self, game, x, y):
-        NonPlayerCharacter.__init__(self, game, x, y)
-        self.images = {
-            "NPC_r": self.game.spritesheet_k_r.get_image(0, 0, 100, 100)
-        }
-        self.image = self.images["NPC_r"]
-        for image in self.images:
-            self.images[image].set_colorkey(BG_SPRITE_COLOR)
-        self.id = 1
-        self.dialog_step = 1
-
-    def handle_dialog(self, quest, conv_link, end_dialog, tags):
-        self.quest_id = quest
-        self.dialog_step = conv_link
-        if end_dialog:
-            self.reset_dialog()
-        else:
-            self.reset_dialog()
-            self.active = True
-        if "Health" in tags:
-            self.game.player.add_item("Health")
-
-    def update(self):
-        self.get_clicked()
-        if self.health <= 0:
-            self.kill()
-        # self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        self.acc = vec(NPC_SPEED, 0).rotate(-self.rot)
-        self.acc += self.vel * -1
-        self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-        self.hit_rect.centerx = self.pos.x
-        if self.vel.x >= 0:
-            self.image = self.images["NPC_r"]
-        else:
-            self.image = self.images["NPC_r"]
-        collide_with_walls(self, self.game.walls, 'x')
-        self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.walls, 'y')
-        self.rect.center = self.hit_rect.center
-
-        if self.active:
-            if self.game.dialog_selection is None:
-                self.game.dialog = True
-                self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
-            else:
-                self.handle_dialog(NPC_id[self.id][self.dialog_step]["Quest_ID"],
-                                   NPC_id[self.id][self.dialog_step][""])
-                # self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
-                #                    conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
-                #                    conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
-                #                    conversation_options["ID"][self.game.dialog_selection]["Tags"])
-
-
 class QuestNPC(NonPlayerCharacter):
     def __init__(self, game, x, y, ID):
         NonPlayerCharacter.__init__(self, game, x, y, ID)
@@ -179,9 +122,6 @@ class QuestNPC(NonPlayerCharacter):
                 self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
                 self.handle_quest_reward()
                 self.quest_id = None
-
-            # Check to see if quest requirements are complete. This maybe should be moved to it's own class so it can
-            # be displayed in the UI
             if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
                 Quests.change_quest_status(self.quest_id, "Complete")
 

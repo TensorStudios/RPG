@@ -5,6 +5,7 @@ from itertools import cycle
 from Settings import *
 import random
 import time
+from NPC import Quests
 
 vec = pg.math.Vector2
 
@@ -297,6 +298,8 @@ class Mob(pg.sprite.Sprite):
         self.patrol_change = pg.time.get_ticks()
         self.patrol_direction = random.randrange(0, 361)
         self.spawn_number = len(self.game.mobs)
+        # add a list of all of the quests this mob is a target for
+        self.quests = [1]
         logging.info(f"Created Mob {self.spawn_number}")
 
     def __str__(self):
@@ -330,9 +333,16 @@ class Mob(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = self.patrol_direction
 
+    def update_quest(self):
+        for quest in self.quests:
+            if quest in Quests.QUEST_STATUS["Active"]:
+                logging.info(f"Adding to counter for quest id: {self.quests}")
+                Quests.update_quest_progress(quest, 1)
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
+            self.update_quest()
             if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()

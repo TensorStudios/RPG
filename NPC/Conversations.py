@@ -49,13 +49,13 @@ NPC_id = {
     2: {
         "Dialog ID": {
             1: {
-                "Quest_ID": 0,
+                "Quest_ID": 1,
                 "Text": "Would you kindly remove these Zombies?",
                 "Options": {
                     1: {
                         "Text": "Sure!",
                         "Link": 2,
-                        "Tags": ["Start 1"],
+                        "Tags": ["Start"],
                         "End Dialog": True,
                     },
                     2: {
@@ -67,7 +67,7 @@ NPC_id = {
                 }
             },
             2: {
-                "Quest_ID": 0,
+                "Quest_ID": 1,
                 "Text": "What are you waiting for?",
                 "Options": {
                     1: {
@@ -79,13 +79,13 @@ NPC_id = {
                     2: {
                         "Text": "Nah ...",
                         "Link": 3,
-                        "Tags": ["Cancel 1"],
+                        "Tags": ["Cancel"],
                         "End Dialog": False,
                     }
                 }
             },
             3: {
-                "Quest_ID": 0,
+                "Quest_ID": 1,
                 "Text": "If you change your mind, talk to me again",
                 "Options": {
                     "Text": "Ok",
@@ -96,13 +96,13 @@ NPC_id = {
                 }
             },
             4: {
-                "Quest_ID": 0,
+                "Quest_ID": 1,
                 "Text": "Great job. Here is your reward",
                 "Options": {
                     1: {
                         "Text": "Thanks!",
                         "Link": 5,
-                        "Tags": ["Complete 1"],
+                        "Tags": ["Close"],
                         "End Dialog": True,
                     }
                 }

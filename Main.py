@@ -318,7 +318,7 @@ class Game:
     # Trigger dialog
     def open_dialog(self):
         if self.dialog:
-            logging.info("Open Dialog")
+            logging.debug("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
 
     # Draw dialog
@@ -348,7 +348,8 @@ class Game:
                                20, BLUE, x + 5, y + (position * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC
                 if mouse[0]:
-                    self.dialog_selection = option["Link"]
+                    logging.debug(f"Dialog option selected: {position} ")
+                    self.dialog_selection = position
             else:
                 self.draw_text(option_text, self.inventory_font,
                                20, WHITE, x + 5, y + (position * text_height), "w")

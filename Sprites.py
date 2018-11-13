@@ -5,6 +5,8 @@ from itertools import cycle
 from Settings import *
 import random
 import time
+from Items.Weapons import WEAPONS
+from Player.PlayerData import PLAYER
 
 vec = pg.math.Vector2
 
@@ -94,17 +96,18 @@ class Player(pg.sprite.Sprite):
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.hit_rect = PLAYER_HIT_RECT
+        self.hit_rect = PLAYER["Hit Rect"]
         self.hit_rect.center = self.rect.center
         self.vel = vec(0, 0)
         self.pos = vec(x, y)
         self.facing = "R"
         self.direction = 270.0
-        self.health = PLAYER_HEALTH
+        self.health = PLAYER["Health"]
         self.last_attack = pg.time.get_ticks() - 150
-        self.attack_radius = WEAPON_RANGE
-        self.attack_speed = WEAPON_SPEED
-        self.damage = WEAPON_DAMAGE
+        self.attack_radius = PLAYER["Weapon"]["Range"]
+        self.attack_speed = PLAYER["Weapon"]["Speed"]
+        self.attack_arc = PLAYER["Weapon"]["Arc"]
+        self.damage = PLAYER["Weapon"]["Damage"]
         self.attacking = False
         self.inventory = [
             "Health",
@@ -113,6 +116,12 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
+
+        # Level Up
+        self.level = 1
+        self.exp = 0
+        self.damage_modifier = 1
+
         logging.info("Player Character Created")
 
     def __str__(self):
@@ -131,11 +140,11 @@ class Player(pg.sprite.Sprite):
                 mobs_in_range.append(mob)
         # Check if it has been long enough
         now = pg.time.get_ticks()
-        if now - WEAPON_SPEED > self.last_attack:
+        if now - self.attack_speed > self.last_attack:
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
-            logging.info("player attacks")
+            logging.debug("player attacks")
             # Character Attack Pose
             if self.facing == "R":
                 self.image = self.attack_right[self.update_frame()]
@@ -147,9 +156,9 @@ class Player(pg.sprite.Sprite):
             for mob in mobs_in_range:
                 # Check if the mob is within the weapon arc
                 # largest degree
-                high_angle = (self.direction + WEAPON_ARC) % 360
+                high_angle = (self.direction + self.attack_arc) % 360
                 # Smallest degree
-                low_angle = (self.direction - WEAPON_ARC) % 360
+                low_angle = (self.direction - self.attack_arc) % 360
                 # The angle of the mob to the player
                 mob_angle = (self.pos - mob.pos).normalize()
                 # Add 180 degrees to make it easy to compare angles
@@ -158,8 +167,7 @@ class Player(pg.sprite.Sprite):
                 # See if the mob angle is within the two angles
                 if high_angle >= mob_angle >= low_angle:
                     logging.debug("hit connects")
-                    mob.health -= WEAPON_DAMAGE
-                    # print("Hit")
+                    mob.health -= self.damage
                 # account for if the mob is at a high angle and high_angle is at a low value
                 elif high_angle < 90:
                     if mob_angle >= 315:
@@ -167,11 +175,11 @@ class Player(pg.sprite.Sprite):
                     low_angle -= 360
                     if high_angle >= mob_angle >= low_angle:
                         logging.debug("hit connects")
-                        mob.health -= WEAPON_DAMAGE
+                        mob.health -= int(self.damage * self.damage_modifier)
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
-        if now - self.damage_time >= PLAYER_DAMAGE_MITIGATION_TIME:
+        if now - self.damage_time >= PLAYER["Damage Mitigation Time"]:
             logging.info(f"Player takes {damage} damage")
             self.damage_time = now
             self.health -= damage
@@ -183,16 +191,16 @@ class Player(pg.sprite.Sprite):
         movey = False
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vel += vec(-PLAYER_SPEED, 0)
+            self.vel += vec(-PLAYER["Speed"], 0)
             movex = True
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vel += vec(PLAYER_SPEED, 0)
+            self.vel += vec(PLAYER["Speed"], 0)
             movex = True
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vel += vec(0, -PLAYER_SPEED)
+            self.vel += vec(0, -PLAYER["Speed"])
             movey = True
         if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vel += vec(0, PLAYER_SPEED)
+            self.vel += vec(0, PLAYER["Speed"])
             movey = True
         if movex and movey:
             self.vel *= 0.7071
@@ -219,8 +227,20 @@ class Player(pg.sprite.Sprite):
             used_item = self.inventory.pop(item)
             if used_item == "Health":
                 self.health += 25
-                if self.health > PLAYER_HEALTH:
-                    self.health = PLAYER_HEALTH
+                if self.health > PLAYER["Health"]:
+                    self.health = PLAYER["Health"]
+
+    def collect_exp(self, exp):
+        self.exp += exp
+        logging.info(f"Player has gained {exp} exp and now has {self.exp} exp")
+        if self.exp >= PLAYER["Level Up"]["Exp Required"] * self.level:
+            self.level = int(self.exp / PLAYER["Level Up"]["Exp Required"]) + 1
+            self.damage_modifier *= PLAYER["Level Up"]["Dmg Increase"]
+            PLAYER["Health"] += PLAYER["Level Up"]["Health Increase"]
+            self.health = PLAYER["Health"]
+            logging.info(f"Player has leveled up to {self.level}")
+            logging.info(f"Player health has increased to {PLAYER['Health']}")
+            logging.info(f"Player Damage modifier has increased to {self.damage_modifier}")
 
     def update(self):
         self.get_keys()
@@ -330,9 +350,14 @@ class Mob(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = self.patrol_direction
 
+    def grant_exp(self):
+        self.game.player.collect_exp(MOB_EXP)
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
+            logging.info(f"Mob {self.spawn_number} has died")
+            self.grant_exp()
             if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()
@@ -403,7 +428,7 @@ class WeaponAnimation(pg.sprite.Sprite):
         self.type = type
         self.game = game
         self.character = character
-        self.rot = -(self.character.direction - WEAPON_ARC + 90) % 360
+        self.rot = -(self.character.direction - PLAYER["Weapon"]["Arc"] + 90) % 360
         self.last_update = pg.time.get_ticks()
         self.image = self.game.weapon_animations[self.type]["Images"][0]
         self.image = pg.transform.rotate(self.image, self.rot)

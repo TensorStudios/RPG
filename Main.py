@@ -21,6 +21,7 @@ from tilemap import *
 from NPC.NPC import *
 from NPC.Conversations import conversation_options
 from NPC.Quests import Quests
+from Player.PlayerData import PLAYER
 
 
 logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
@@ -286,7 +287,7 @@ class Game:
     # Trigger inventory screen
     def open_inventory(self):
         if self.show_inventory:
-            logging.info("Inventory Open")
+            logging.debug("Inventory Open")
             self.draw_player_inventory(self.screen, 750, 150, self.player.inventory)
 
     # Draw inventory on screen
@@ -439,8 +440,8 @@ class Game:
             self.pause_menu()
 
         # HUD Functions
-        draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
-        draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER_HEALTH)
+        draw_player_health(self.screen, 10, 10, self.player.health / PLAYER["Health"])
+        draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER["Health"])
         draw_player_equip1(self.screen, 700, 10, 1)
         draw_player_equip2(self.screen, 830, 10, 1)
         self.open_inventory()

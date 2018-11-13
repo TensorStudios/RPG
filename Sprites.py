@@ -289,7 +289,7 @@ class Player(pg.sprite.Sprite):
 
 
 class Mob(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, respawn=False):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -461,6 +461,41 @@ class WeaponAnimation(pg.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = self.character.rect.center
                 self.frame += 1
+
+
+class MobSpawnZone:
+    def __init__(self, x, y, width, height, game):
+        self.groups = game.all_sprites
+        self.target = 5
+        self.mobs = []
+        self.game = game
+        self.game.spawn_zones.append(self)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.respawn_timer = 5000
+        self.respawn_time = pg.time.get_ticks()
+
+    def create_spawn_point(self, dir):
+        if dir == "x":
+            x = random.randrange(self.x, self.x + self.width)
+            return x
+        if dir == "y":
+            y = random.randrange(self.y, self.y + self.height)
+            return y
+
+    def update(self):
+        now = pg.time.get_ticks()
+        for position, mob in enumerate(self.mobs):
+            if not mob.alive():
+                self.mobs.pop(position)
+        if now - self.respawn_time > self.respawn_timer:
+            self.respawn_time = now
+            if len(self.mobs) < self.target:
+                print("Spawning Mob")
+                self.mobs.append(Mob(self.game, self.create_spawn_point("x"), self.create_spawn_point("y")))
+
 
 class Item(pg.sprite.Sprite):
     def __init__(self, game, pos, type):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextobjectid="83">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextobjectid="85">
  <tileset firstgid="1" source="Kenney_TDS.tsx"/>
  <layer name="Ground" width="60" height="60">
   <data encoding="csv">
@@ -201,5 +201,7 @@
   <object id="80" name="Wall" x="0" y="16" width="16" height="3808"/>
   <object id="81" name="NPC" type="2" x="1920" y="1920" width="64" height="64"/>
   <object id="82" name="Health" x="1692" y="2012" width="64" height="76"/>
+  <object id="83" name="Mob_Spawn_Zone" x="1984" y="2880" width="1472" height="896"/>
+  <object id="84" x="3424" y="2464"/>
  </objectgroup>
 </map>

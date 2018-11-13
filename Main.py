@@ -193,6 +193,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        self.spawn_zones = []
         logging.info("Loading map")
         self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
         self.map_img = self.map.make_map()
@@ -231,6 +232,10 @@ class Game:
                 QuestNPC(self, object_center.x, object_center.y)
                 logging.debug("Placing NPC Sprite")
 
+            # Spawn Zones
+            if tile_object.name == "Mob_Spawn_Zone":
+                MobSpawnZone(tile_object.x, tile_object.y, tile_object.width, tile_object.height, self)
+
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
         self.paused = False
@@ -260,6 +265,10 @@ class Game:
 
         self.all_sprites.update()
         self.camera.update(self.player)
+
+        # if there are spawn zones, update them
+        for zone in self.spawn_zones:
+            zone.update()
 
         # mobs hit player, if a mob runs into the player, knock player back and deal damage to player
         hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
@@ -432,7 +441,10 @@ class Game:
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
             if self.draw_debug:
-                pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(sprite.hit_rect), 1)
+                try:
+                    pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(sprite.hit_rect), 1)
+                except AttributeError:
+                    continue
         if self.draw_debug:
             for wall in self.walls:
                 pg.draw.rect(self.screen, WHITE, self.camera.apply_rect(wall.rect), 1)

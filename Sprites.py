@@ -102,12 +102,7 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(x, y)
         self.facing = "R"
         self.direction = 270.0
-        self.health = PLAYER["Health"]
         self.last_attack = pg.time.get_ticks() - 150
-        self.attack_radius = PLAYER["Weapon"]["Range"]
-        self.attack_speed = PLAYER["Weapon"]["Speed"]
-        self.attack_arc = PLAYER["Weapon"]["Arc"]
-        self.damage = PLAYER["Weapon"]["Damage"]
         self.attacking = False
         self.inventory = [
             "Health",
@@ -116,6 +111,16 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
+
+        # stats
+        self.health = PLAYER["Health"]
+        self.mana = PLAYER["Mana"]
+        self.mana_recharge = PLAYER["Mana Recharge"]
+        self.mana_recharge_timer = pg.time.get_ticks()
+        self.attack_radius = PLAYER["Weapon"]["Range"]
+        self.attack_speed = PLAYER["Weapon"]["Speed"]
+        self.attack_arc = PLAYER["Weapon"]["Arc"]
+        self.damage = PLAYER["Weapon"]["Damage"]
 
         # Level Up
         self.level = 1
@@ -132,27 +137,43 @@ class Player(pg.sprite.Sprite):
             self.frame = self.walk_cycle.__next__()
         return self.frame
 
-    def attack(self):
+    def attack(self, ability="Default"):
         # Find mobs in range
+        ability_modifier = PLAYER["Abilities"][ability]["Damage Modifier"]
         mobs_in_range = []
         for mob in self.game.mobs:
             if self.pos.distance_squared_to(mob.pos) <= self.attack_radius ** 2:
                 mobs_in_range.append(mob)
+        # Check if player has enough mana
+        cost = PLAYER["Abilities"][ability]["Mana Cost"] < self.mana
         # Check if it has been long enough
         now = pg.time.get_ticks()
-        if now - self.attack_speed > self.last_attack:
+        if now - self.attack_speed > self.last_attack and cost is True:
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
             logging.debug("player attacks")
+            # spend mana cost of ability
+            self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
             # Character Attack Pose
             if self.facing == "R":
                 self.image = self.attack_right[self.update_frame()]
             else:
                 self.image = self.attack_left[self.update_frame()]
-            logging.debug("spawning weapon animation")
-            WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
 
+            # Spawn Weapon Animation
+            logging.debug("spawning weapon animation")
+            if ability == "Fire Attack":
+                logging.debug("Fire Weapon Animation")
+                WeaponAnimation(self.attack_speed, self.direction, "fire sword", self.game, self)
+            elif ability == "Default":
+                logging.debug("Normal Weapon Animation")
+                WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+            else:
+                logging.warning(f"An inproper player ability was called: {ability}")
+                WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+
+            # Hit all mobs in range
             for mob in mobs_in_range:
                 # Check if the mob is within the weapon arc
                 # largest degree
@@ -175,7 +196,7 @@ class Player(pg.sprite.Sprite):
                     low_angle -= 360
                     if high_angle >= mob_angle >= low_angle:
                         logging.debug("hit connects")
-                        mob.health -= int(self.damage * self.damage_modifier)
+                        mob.health -= int(self.damage * self.damage_modifier * ability_modifier)
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
@@ -206,6 +227,8 @@ class Player(pg.sprite.Sprite):
             self.vel *= 0.7071
         if keys[pg.K_SPACE]:
             self.attack()
+        if keys[pg.K_q]:
+            self.attack(ability="Fire Attack")
 
     def get_direction(self):
         # find what direction the player is facing
@@ -242,7 +265,18 @@ class Player(pg.sprite.Sprite):
             logging.info(f"Player health has increased to {PLAYER['Health']}")
             logging.info(f"Player Damage modifier has increased to {self.damage_modifier}")
 
+    def recharge_mana(self):
+        now = pg.time.get_ticks()
+        if now - self.mana_recharge_timer > self.mana_recharge:
+            self.mana_recharge_timer = now
+            self.mana += 1
+            if self.mana >= PLAYER["Mana"]:
+                self.mana = PLAYER["Mana"]
+
     def update(self):
+        # Recharge Mana
+        self.recharge_mana()
+
         self.get_keys()
         self.direction = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
         self.rect = self.image.get_rect()

@@ -165,6 +165,7 @@ class Game:
         self.spritesheet_k_a_r = Spritesheet(resource_path(img_folder + "Knight Attack Pose.png"))
         self.spritesheet_k_a_l = Spritesheet(resource_path(img_folder + "Knight Attack Pose Left.png"))
         self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Attack Animation.png"))
+        self.spritesheet_fire_attack = Spritesheet(resource_path(img_folder + "Fire Attack.png"))
         self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
         self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
 
@@ -174,6 +175,13 @@ class Game:
                 "Images": {
                     0: self.spritesheet_aa_s.get_image(0, 0, 160, 160),
                     1: self.spritesheet_aa_s.get_image(0, 160, 160, 160)
+                }
+            },
+            "fire sword": {
+                "Frame Rate": 100,
+                "Images": {
+                    0: self.spritesheet_fire_attack.get_image(0, 0, 160, 160),
+                    1: self.spritesheet_fire_attack.get_image(0, 160, 160, 160)
                 }
             }
         }
@@ -452,7 +460,7 @@ class Game:
 
         # HUD Functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER["Health"])
-        draw_player_mana(self.screen, 10, 70, self.player.health / PLAYER["Health"])
+        draw_player_mana(self.screen, 10, 70, self.player.mana / PLAYER["Mana"])
         draw_player_equip1(self.screen, 700, 10, 1)
         draw_player_equip2(self.screen, 830, 10, 1)
         self.open_inventory()

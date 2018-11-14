@@ -195,8 +195,9 @@ class Player(pg.sprite.Sprite):
                         mob_angle -= 360
                     low_angle -= 360
                     if high_angle >= mob_angle >= low_angle:
-                        logging.debug("hit connects")
-                        mob.health -= int(self.damage * self.damage_modifier * ability_modifier)
+                        damage = int(self.damage * self.damage_modifier * ability_modifier)
+                        logging.info(f"hit connects for {damage} damage")
+                        mob.health -= damage
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
@@ -346,6 +347,7 @@ class Mob(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = 0
         self.health = MOB_HEALTH
+        self.health_bar = None
         self.target = game.player
 
         self.patrol_change = pg.time.get_ticks()
@@ -412,13 +414,26 @@ class Mob(pg.sprite.Sprite):
             self.pos += self.vel * self.game.dt #+ 0.5 * self.acc * self.game.dt ** 2
             self.hit_rect.centerx = self.pos.x
             if self.vel.x >= 0:
-                self.image = self.images["Zombie_r"]
+                self.image = self.images["Zombie_r"].copy()
             else:
-                self.image = self.images["Zombie_l"]
+                self.image = self.images["Zombie_l"].copy()
+            self.draw_health()
             collide_with_walls(self, self.game.walls, 'x')
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
+
+    def draw_health(self):
+        if self.health > 60:
+            col = GREEN
+        elif self.health > 30:
+            col = YELLOW
+        else:
+            col = RED
+        width = int(self.rect.width * self.health / MOB_HEALTH)
+        self.health_bar = pg.Rect(0, 0, width, 7)
+        if self.health < MOB_HEALTH:
+            pg.draw.rect(self.image, col, self.health_bar)
 
 
 class Obstacle(pg.sprite.Sprite):

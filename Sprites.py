@@ -449,6 +449,9 @@ class WeaponAnimation(pg.sprite.Sprite):
             return "BL"
 
     def update(self):
+        if self.character.attacking:
+            self.rect.center = self.character.rect.center
+
         now = pg.time.get_ticks()
         if now - self.last_update > self.frame_rate:
             self.last_update = now
@@ -493,7 +496,7 @@ class MobSpawnZone:
         if now - self.respawn_time > self.respawn_timer:
             self.respawn_time = now
             if len(self.mobs) < self.target:
-                print("Spawning Mob")
+                logging.info("Mob Spawn Zone: Spawning Mob")
                 self.mobs.append(Mob(self.game, self.create_spawn_point("x"), self.create_spawn_point("y")))
 
 

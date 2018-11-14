@@ -164,7 +164,7 @@ class Game:
         self.spritesheet_k_l = Spritesheet(resource_path(img_folder + "Knight Left.png"))
         self.spritesheet_k_a_r = Spritesheet(resource_path(img_folder + "Knight Attack Pose.png"))
         self.spritesheet_k_a_l = Spritesheet(resource_path(img_folder + "Knight Attack Pose Left.png"))
-        self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Sword Attack Animation.png"))
+        self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Attack Animation.png"))
         self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
         self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
 
@@ -173,8 +173,7 @@ class Game:
                 "Frame Rate": 100,
                 "Images": {
                     0: self.spritesheet_aa_s.get_image(0, 0, 160, 160),
-                    1: self.spritesheet_aa_s.get_image(160, 0, 160, 160),
-                    2: self.spritesheet_aa_s.get_image(0, 160, 160, 160)
+                    1: self.spritesheet_aa_s.get_image(0, 160, 160, 160)
                 }
             }
         }

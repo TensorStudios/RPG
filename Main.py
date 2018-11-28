@@ -18,108 +18,15 @@ from Settings import *
 from Sprites import *
 from os import path, chdir, getcwd
 from tilemap import *
-from NPC.NPC import *
-from NPC.Conversations import conversation_options
+from NPC.NPC import QuestNPC
+from NPC.Conversations import NPC_id
 from NPC.Quests import Quests
 from Player.PlayerData import PLAYER
+from Interface.UI import *
 
 
 logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
                     format="%(asctime)s:%(levelname)s:%(message)s")
-
-
-def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return path.join(sys._MEIPASS, relative_path)
-    return path.join(path.abspath("."), relative_path)
-
-
-def text_objects(text, font):
-    textSurface = font.render(text, True, BLACK)
-    return textSurface, textSurface.get_rect()
-
-
-def button(game, msg, x, y, w, h, ic, ac, action=None):
-    mouse = pg.mouse.get_pos()
-    click = pg.mouse.get_pressed()
-
-    if x + w > mouse[0] > x and y + h > mouse[1] > y:
-        pg.draw.rect(game.screen, ac, (x, y, w, h))
-        if click[0] == 1 and action != None:
-            if action == "play":
-                logging.info("Play button pressed")
-                game.intro = False
-            elif action == "quit":
-                logging.info("Quit Button Pressed")
-                pg.quit()
-                quit()
-    else:
-        pg.draw.rect(game.screen, ic, (x, y, w, h))
-
-    smallText = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 30)
-    textSurf, textRect = text_objects(msg, smallText)
-    textRect.center = ((x + (w / 2)), (y + (h / 2)))
-    game.screen.blit(textSurf, textRect)
-
-    if x + w > mouse[0] > x and y + h > mouse[1] > y:
-        pg.draw.rect(game.screen, ac, (x, y, w, h))
-    else:
-        pg.draw.rect(game.screen, ic, (x, y, w, h))
-
-    textSurf, textRect = text_objects(msg, smallText)
-    textRect.center = ((x + (w / 2)), (y + (h / 2)))
-    game.screen.blit(textSurf, textRect)
-
-
-# HUD functions
-def draw_player_health(surf, x, y, pct):
-    if pct < 0:
-        pct = 0
-    BAR_LENGTH = 500
-    BAR_HEIGHT = 60
-    fill = pct * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    if pct > 0.6:
-        col = GREEN
-    elif pct > 0.3:
-        col = YELLOW
-    else:
-        col = RED
-    pg.draw.rect(surf, col, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
-
-
-def draw_player_mana(surf, x, y, pct):
-    if pct < 0:
-        pct = 0
-    BAR_LENGTH = 500
-    BAR_HEIGHT = 40
-    fill = pct * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    pg.draw.rect(surf, BLUE, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
-
-
-def draw_player_equip1(surf, x, y, pct):
-    BAR_LENGTH = 100
-    BAR_HEIGHT = 100
-    fill = pct * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    pg.draw.rect(surf, BLACK, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
-
-
-def draw_player_equip2(surf, x, y, pct):
-    BAR_LENGTH = 100
-    BAR_HEIGHT = 100
-    fill = pct * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    pg.draw.rect(surf, BLACK, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
 
 
 class Game:
@@ -220,24 +127,20 @@ class Game:
             if tile_object.name == "Player":
                 self.player = Player(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
-            if tile_object.name == "Mob":
+            elif tile_object.name == "Mob":
                 Mob(self, object_center.x, object_center.y)
                 logging.debug("Placing Mob Sprite")
-            if tile_object.name == "Wall":
+            elif tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
                 logging.debug("Placing Obstacle sprite")
-            if tile_object.name == "Health":
+            elif tile_object.name == "Health":
                 Item(self, (object_center.x, object_center.y), tile_object.name)
                 logging.debug("Placing Item Sprite")
-            # check name: NPC and type for NPC ID
-            # This could use a more elegant implementation because it will quickly get out of hand with many
-            # NPC characters
-            if tile_object.name == "NPC" and tile_object.type == "1":
-                TestNPC(self, object_center.x, object_center.y)
+            elif tile_object.name == "Quest_NPC":
+                QuestNPC(self, object_center.x, object_center.y, ID=int(tile_object.type))
                 logging.debug("Placing NPC Sprite")
-            if tile_object.name == "NPC" and tile_object.type == "2":
-                QuestNPC(self, object_center.x, object_center.y)
-                logging.debug("Placing NPC Sprite")
+            else:
+                logging.warning(f"{tile_object.name} is unable to be loaded because it has not been coded yet")
 
             # Spawn Zones
             if tile_object.name == "Mob_Spawn_Zone":
@@ -333,11 +236,21 @@ class Game:
     # Trigger dialog
     def open_dialog(self):
         if self.dialog:
-            logging.info("Open Dialog")
+            logging.debug("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
 
     # Draw dialog
     def draw_dialog(self, surf, message, options):
+        """
+
+        :param surf: The game screen
+        :param message: The message of the NPC Text, passed from the NPC Class
+        :param options: THe Options of the NPC Text, also passed from the NPC Class
+
+        Once an option is chosen, the NPC Class looks at self.dialog_selection to handle the reaction.
+        The NPC Class will reset self.dialog_selection back to None once it has been handled
+
+        """
         x = 100
         y = 500
         box_height = 250
@@ -354,19 +267,20 @@ class Game:
         mouse = pg.mouse.get_pressed()
 
         # Draw options
-        for position, option in enumerate(options):
-            option_text = conversation_options["ID"][option]["Text"]
-            rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
+        for position, option in options.items():
+            option_text = option["Text"]
+            rect = pg.Rect(x + 5, y + 5 + (position * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
             if rect.collidepoint(pg.mouse.get_pos()):
                 self.draw_text(option_text, self.inventory_font,
-                               20, BLUE, x + 5, y + 15 + (position * text_height), "w")
+                               20, BLUE, x + 5, y + (position * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC
                 if mouse[0]:
-                    self.dialog_selection = option
+                    logging.debug(f"Dialog option selected: {position} ")
+                    self.dialog_selection = position
             else:
                 self.draw_text(option_text, self.inventory_font,
-                               20, WHITE, x + 5, y + 15 + (position * text_height), "w")
+                               20, WHITE, x + 5, y + (position * text_height), "w")
 
         # Draw text
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")

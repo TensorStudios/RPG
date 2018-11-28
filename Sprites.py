@@ -5,6 +5,7 @@ from itertools import cycle
 from Settings import *
 import random
 import time
+from NPC import Quests
 from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER
 
@@ -353,6 +354,8 @@ class Mob(pg.sprite.Sprite):
         self.patrol_change = pg.time.get_ticks()
         self.patrol_direction = random.randrange(0, 361)
         self.spawn_number = len(self.game.mobs)
+        # add a list of all of the quests this mob is a target for
+        self.quests = [1]
         logging.info(f"Created Mob {self.spawn_number}")
 
     def __str__(self):
@@ -389,11 +392,18 @@ class Mob(pg.sprite.Sprite):
     def grant_exp(self):
         self.game.player.collect_exp(MOB_EXP)
 
+    def update_quest(self):
+        for quest in self.quests:
+            if quest in Quests.QUEST_STATUS["Active"]:
+                logging.info(f"Adding to counter for quest id: {self.quests}")
+                Quests.update_quest_progress(quest, 1)
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
             logging.info(f"Mob {self.spawn_number} has died")
             self.grant_exp()
+            self.update_quest()
             if random.random() >= DROP_RATE:
                 Item(self.game, self.pos, "Health")
             self.kill()

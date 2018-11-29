@@ -12,7 +12,7 @@ Quests = {
     "Quest ID": {
         1: {
             "Available": True,
-            "Status": "Not started",
+            "Status": "Not Started",
             "Linked Quest": None,
             "Start NPC ID": 2,
             "End NPC ID": 2,
@@ -32,7 +32,7 @@ Quests = {
         },
         2: {
             "Available": False,
-            "Status": "Not started",
+            "Status": "Not Started",
             "Linked Quest": 1,
             "Start NPC ID": 2,
             "End NPC ID": 2,
@@ -68,7 +68,7 @@ def refresh_quests():
     QUEST_STATUS["Close"] = []
 
     for quest_id, quest in Quests["Quest ID"].items():
-        if quest["Status"] == "Not started" and quest_id not in QUEST_STATUS["Not Started"]:
+        if quest["Status"] == "Not Started" and quest_id not in QUEST_STATUS["Not Started"]:
             QUEST_STATUS["Not Started"].append(quest_id)
         if quest["Status"] == "Active" and quest_id not in QUEST_STATUS["Active"]:
             QUEST_STATUS["Active"].append(quest_id)
@@ -83,7 +83,7 @@ def refresh_quests():
 
 
 def change_quest_status(quest_id, status):
-    assert status in ["Not started", "Active", "Complete", "Close"]
+    assert status in ["Not Started", "Active", "Complete", "Close"]
     logging.info(f"Changing Status of quest id: {quest_id} to {status}")
     Quests["Quest ID"][quest_id]["Status"] = status
     refresh_quests()
@@ -113,7 +113,7 @@ def update_quest_progress(quest_id, amount=0, abandon=False):
     if abandon:
         logging.info(f"Abandoning quest id: {quest_id}")
         change_quest_status(quest_id, "Not Started")
-        # return Quests["Quest ID"][quest_id]["Conv Links"]["Not Started"]
+        return Quests["Quest ID"][quest_id]["Conv Links"]["Not Started"]
         # If I abandon a quest once I have completed some of the requirements, should the requirements be saved?
 
     # Update quest requirement counter with amount

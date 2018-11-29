@@ -136,15 +136,13 @@ class Game:
             elif tile_object.name == "Health":
                 Item(self, (object_center.x, object_center.y), tile_object.name)
                 logging.debug("Placing Item Sprite")
-            elif tile_object.name == "Quest_NPC":
+            elif tile_object.name == "NPC":
                 QuestNPC(self, object_center.x, object_center.y, ID=int(tile_object.type))
                 logging.debug("Placing NPC Sprite")
+            elif tile_object.name == "Mob_Spawn_Zone":
+                MobSpawnZone(tile_object.x, tile_object.y, tile_object.width, tile_object.height, self)
             else:
                 logging.warning(f"{tile_object.name} is unable to be loaded because it has not been coded yet")
-
-            # Spawn Zones
-            if tile_object.name == "Mob_Spawn_Zone":
-                MobSpawnZone(tile_object.x, tile_object.y, tile_object.width, tile_object.height, self)
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)

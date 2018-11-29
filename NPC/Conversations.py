@@ -47,7 +47,7 @@ NPC_id = {
                         "Text": "Thanks",
                         "Link": 3,
                         "Tags": ["Health"],
-                        "End Dialog": False
+                        "End Dialog": True
                     }
                 }
             },
@@ -98,7 +98,7 @@ NPC_id = {
                     2: {
                         "Text": "Nah ...",
                         "Link": 3,
-                        "Tags": ["Cancel"],
+                        "Tags": [],
                         "End Dialog": False,
                     }
                 }
@@ -107,11 +107,12 @@ NPC_id = {
                 "Quest_ID": 1,
                 "Text": "If you change your mind, talk to me again",
                 "Options": {
-                    "Text": "Ok",
-                    "Link": 1,
-                    "Tags": [],
-                    "End Dialog": True,
-
+                    1: {
+                        "Text": "Ok",
+                        "Link": 1,
+                        "Tags": ["Cancel"],
+                        "End Dialog": True,
+                    }
                 }
             },
             4: {

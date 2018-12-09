@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextobjectid="83">
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="64" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="85">
  <tileset firstgid="1" source="Kenney_TDS.tsx"/>
- <layer name="Ground" width="60" height="60">
+ <layer id="1" name="Ground" width="60" height="60">
   <data encoding="csv">
 2,4,1,2,1,3,1,4,2,2,1,2,3,1,2,4,4,2,4,2,4,3,2,1,4,2,4,1,3,4,2,3,1,3,1,4,1,4,3,2,2,2,2,2,4,2,3,2,3,1,1,1,3,2,4,4,1,1,1,4,
 1,2,3,4,2,2,2,1,3,4,1,2,4,2,4,1,2,4,2,2,1,2,1,3,3,3,3,2,2,1,1,4,4,4,1,1,2,4,2,1,4,1,3,4,1,3,2,4,1,4,4,4,2,4,1,1,2,3,4,1,
@@ -65,7 +65,7 @@
 1,4,1,4,4,4,4,4,4,2,2,3,3,2,1,1,3,3,3,3,1,3,1,2,1,3,4,3,4,2,1,1,3,1,4,1,4,3,4,1,3,4,3,2,1,4,4,1,3,2,4,4,4,4,3,2,2,4,3,4
 </data>
  </layer>
- <layer name="Walls" width="60" height="60">
+ <layer id="2" name="Walls" width="60" height="60">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -129,7 +129,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="Objects">
+ <objectgroup id="3" name="Objects">
   <object id="1" name="Wall" x="1600" y="1328" width="640" height="16"/>
   <object id="2" name="Wall" x="2224" y="1344" width="16" height="960"/>
   <object id="5" name="Wall" x="1600" y="2304" width="640" height="16"/>
@@ -201,5 +201,6 @@
   <object id="80" name="Wall" x="0" y="16" width="16" height="3808"/>
   <object id="81" name="NPC" type="2" x="1920" y="1920" width="64" height="64"/>
   <object id="82" name="Health" x="1692" y="2012" width="64" height="76"/>
+  <object id="83" name="Mob_Spawn_Zone" x="1984" y="2880" width="1472" height="896"/>
  </objectgroup>
 </map>

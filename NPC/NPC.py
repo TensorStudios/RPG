@@ -1,17 +1,18 @@
 import pygame as pg
+import logging
 import math
 from itertools import cycle
 from Settings import *
 from Sprites import collide_with_walls, collide_hit_rect
-from NPC.Conversations import npc_conversations, conversation_options
-from NPC.Quests import Quests
+from NPC.Conversations import NPC_id
+from NPC import Quests
 
 vec = pg.math.Vector2
 
 
 # Master class for NPC
 class NonPlayerCharacter(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, ID):
         self.groups = game.all_sprites, game.npcs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
@@ -37,9 +38,9 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.click_delay = pg.time.get_ticks()
         self.active = False
         self.dialog_step = None
-        self.id = 0
+        self.id = ID
         self.quest_id = None
-        self.dialog_shortcut = npc_conversations["Dialog ID"]
+        self.dialog_shortcut = NPC_id[self.id]["Dialog ID"]
 
     # Check if the NPC was clicked and the player is close enough. Also checks if the player has walked away
     def get_clicked(self):
@@ -69,7 +70,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
     # Used by main.py to get the text and options to display
     def get_dialog_text_and_options(self):
         text = self.dialog_shortcut[self.dialog_step]["Text"]
-        options = self.dialog_shortcut[self.dialog_step]["options"]
+        options = self.dialog_shortcut[self.dialog_step]["Options"]
 
         return text, options
 
@@ -84,19 +85,20 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         pass
 
 
-class TestNPC(NonPlayerCharacter):
-    def __init__(self, game, x, y):
-        NonPlayerCharacter.__init__(self, game, x, y)
+class QuestNPC(NonPlayerCharacter):
+    def __init__(self, game, x, y, ID):
+        NonPlayerCharacter.__init__(self, game, x, y, ID)
         self.images = {
             "NPC_r": self.game.spritesheet_k_r.get_image(0, 0, 100, 100)
         }
         self.image = self.images["NPC_r"]
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
-        self.id = 1
+        self.id = ID
         self.dialog_step = 1
 
     def handle_dialog(self, quest, conv_link, end_dialog, tags):
+        logging.info(f"Tags: {tags}")
         self.quest_id = quest
         self.dialog_step = conv_link
         if end_dialog:
@@ -104,71 +106,41 @@ class TestNPC(NonPlayerCharacter):
         else:
             self.reset_dialog()
             self.active = True
-        if "health" in tags:
+
+        # Handle Non-Quest Tags Here
+        if "Health" in tags:
+            logging.info("Giving Player Health")
             self.game.player.add_item("Health")
 
-    def update(self):
-        self.get_clicked()
-        if self.health <= 0:
-            self.kill()
-        # self.rot = (self.game.player.pos - self.pos).angle_to(vec(1, 0))
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        self.acc = vec(NPC_SPEED, 0).rotate(-self.rot)
-        self.acc += self.vel * -1
-        self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-        self.hit_rect.centerx = self.pos.x
-        if self.vel.x >= 0:
-            self.image = self.images["NPC_r"]
+        # Handle Quests here
+        if self.quest_id is not None:
+            if "Start" in tags:
+                self.dialog_step = Quests.change_quest_status(self.quest_id, "Active")
+            if "Cancel" in tags:
+                self.dialog_step = Quests.update_quest_progress(self.quest_id, abandon=True)
+            if "Close" in tags:
+                self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
+                self.handle_quest_reward()
+                self.quest_id = None
+            if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
+                Quests.change_quest_status(self.quest_id, "Complete")
+
+    def handle_quest_reward(self):
+        reward = Quests.Quests["Quest ID"][self.quest_id]["Reward"]
+
+        # This is duplicate code, it can be consolidated with handle_dialog
+        if reward == "Health":
+            logging.info("Rewarding player with Health")
+            self.game.player.add_item("Health")
         else:
-            self.image = self.images["NPC_r"]
-        collide_with_walls(self, self.game.walls, 'x')
-        self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.walls, 'y')
-        self.rect.center = self.hit_rect.center
+            logging.warning("This reward has not been added to the code yet")
 
-        if self.active:
-            if self.game.dialog_selection is None:
-                self.game.dialog = True
-                self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
-            else:
-                self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Tags"])
-
-
-class QuestNPC(NonPlayerCharacter):
-    def __init__(self, game, x, y):
-        NonPlayerCharacter.__init__(self, game, x, y)
-        self.images = {
-            "NPC_r": self.game.spritesheet_k_r.get_image(0, 0, 100, 100)
-        }
-        self.image = self.images["NPC_r"]
-        for image in self.images:
-            self.images[image].set_colorkey(BG_SPRITE_COLOR)
-        self.id = 2
-        self.dialog_step = 4
-
-    def handle_dialog(self, quest, conv_link, end_dialog, tags):
-        self.quest_id = quest
-        self.dialog_step = conv_link
-        if end_dialog:
-            self.reset_dialog()
-        else:
-            self.reset_dialog()
-            self.active = True
-        if "quest complete" in tags:
-            self.game.player.add_item(Quests["Quest ID"][1]["Reward"])
 
     # Check if quest is complete
     def quest_status(self):
-        # Check status of quest id 1
-        if self.quest_id == 1:
-            if len(self.game.mobs) == 0:
-                self.dialog_step = 7
-                Quests["Quest ID"][1]["Complete"] = True
+        if self.quest_id is not None:
+            if Quests.check_quest_progress(self.quest_id):
+                self.dialog_step = Quests.Quests["Quest ID"][self.quest_id]["Conv Links"]["Complete"]
 
     def update(self):
         self.get_clicked()
@@ -191,15 +163,19 @@ class QuestNPC(NonPlayerCharacter):
         collide_with_walls(self, self.game.walls, 'y')
         self.rect.center = self.hit_rect.center
 
-        # If player has accepted quest, check if quest is complete
-        self.quest_status()
-
         if self.active:
+            # If player has accepted quest, check if quest is complete
+            self.quest_status()
+
+            # If this NPC has been clicked, but not options have been selected, tell the game what to display
             if self.game.dialog_selection is None:
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                self.handle_dialog(conversation_options["ID"][self.game.dialog_selection]["Quest ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Conversation Link ID"],
-                                   conversation_options["ID"][self.game.dialog_selection]["End Dialog"],
-                                   conversation_options["ID"][self.game.dialog_selection]["Tags"])
+                option_shortcut = self.dialog_shortcut[self.dialog_step]
+                # Handle the consequences of the dialog action
+                self.handle_dialog(option_shortcut["Quest_ID"],
+                                   option_shortcut["Options"][self.game.dialog_selection]["Link"],
+                                   option_shortcut["Options"][self.game.dialog_selection]["End Dialog"],
+                                   option_shortcut["Options"][self.game.dialog_selection]["Tags"],
+                                   )

@@ -25,3 +25,7 @@ PLAYER = {
         "Health Increase": 5
     }
 }
+
+
+def get_exp_requirement(level):
+    return level * 5

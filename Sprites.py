@@ -7,7 +7,7 @@ import random
 import time
 from NPC import Quests
 from Items.Weapons import WEAPONS
-from Player.PlayerData import PLAYER
+from Player.PlayerData import PLAYER, get_exp_requirement
 
 vec = pg.math.Vector2
 
@@ -258,7 +258,7 @@ class Player(pg.sprite.Sprite):
     def collect_exp(self, exp):
         self.exp += exp
         logging.info(f"Player has gained {exp} exp and now has {self.exp} exp")
-        if self.exp >= PLAYER["Level Up"]["Exp Required"] * self.level:
+        if self.exp >= get_exp_requirement(self.level):
             self.level = int(self.exp / PLAYER["Level Up"]["Exp Required"]) + 1
             self.damage_modifier *= PLAYER["Level Up"]["Dmg Increase"]
             PLAYER["Health"] += PLAYER["Level Up"]["Health Increase"]

@@ -4,9 +4,11 @@ import math
 from itertools import cycle
 from Settings import *
 from Sprites import collide_with_walls, collide_hit_rect
-from NPC.Conversations import NPC_id
 from NPC import Quests
+import json
 
+with open("NPC/conversations.json") as json_file:
+    NPC_id = json.load(json_file)
 vec = pg.math.Vector2
 
 
@@ -40,7 +42,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.dialog_step = None
         self.id = ID
         self.quest_id = None
-        self.dialog_shortcut = NPC_id[self.id]["Dialog ID"]
+        self.dialog_shortcut = NPC_id[str(self.id)]["Dialog ID"]
 
     # Check if the NPC was clicked and the player is close enough. Also checks if the player has walked away
     def get_clicked(self):
@@ -69,8 +71,8 @@ class NonPlayerCharacter(pg.sprite.Sprite):
 
     # Used by main.py to get the text and options to display
     def get_dialog_text_and_options(self):
-        text = self.dialog_shortcut[self.dialog_step]["Text"]
-        options = self.dialog_shortcut[self.dialog_step]["Options"]
+        text = self.dialog_shortcut[str(self.dialog_step)]["Text"]
+        options = self.dialog_shortcut[str(self.dialog_step)]["Options"]
 
         return text, options
 
@@ -172,7 +174,7 @@ class QuestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                option_shortcut = self.dialog_shortcut[self.dialog_step]
+                option_shortcut = self.dialog_shortcut[str(self.dialog_step)]
                 # Handle the consequences of the dialog action
                 self.handle_dialog(option_shortcut["Quest_ID"],
                                    option_shortcut["Options"][self.game.dialog_selection]["Link"],

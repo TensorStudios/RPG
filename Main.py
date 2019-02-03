@@ -268,7 +268,7 @@ class Game:
             option_text = option["Text"]
             rect = pg.Rect(x + 5, y + 5 + (int(position) * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
-            if rect.collidepoint(pg.mouse.get_pos()):
+            if rect.collidepoint((pg.mouse.get_pos() + vec(0,5))):
                 self.draw_text(option_text, self.inventory_font,
                                20, BLUE, x + 5, y + (int(position) * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC

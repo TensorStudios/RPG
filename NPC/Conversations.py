@@ -76,7 +76,7 @@ NPC_id = {
         }
     },
     2: {
-        "Default Text": "Hello Traveler",
+        "Default Text": "Hello",
         "Dialog ID": {
             1: {
                 "Quest_ID": 1,

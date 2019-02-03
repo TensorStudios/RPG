@@ -50,6 +50,26 @@ Quests = {
             },
             "Reward": "Health",
         }
+    },
+    3: {
+        "Available": True,
+        "Status": "Not Started",
+        "Linked Quest": None,
+        "Start NPC ID": 1,
+        "End NPC ID": 1,
+        "Prerequisites": None,
+        "Conv Links": {
+            "Not Started": 1,
+            "Active": 2,
+            "Complete": 3,
+            "Close": 5
+        },
+        "Requirement": {
+            "Description": "Get a healthpack",
+            "Counter": 0,
+            "Goal": 1
+        },
+        "Reward": "Health",
     }
 }
 

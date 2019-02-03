@@ -71,8 +71,22 @@ class NonPlayerCharacter(pg.sprite.Sprite):
 
     # Used by main.py to get the text and options to display
     def get_dialog_text_and_options(self):
-        text = self.dialog_shortcut[str(self.dialog_step)]["Text"]
-        options = self.dialog_shortcut[str(self.dialog_step)]["Options"]
+        # If the NPC should be at the "Empty Dialog screen"
+        if self.dialog_step is None:
+            text = NPC_id[str(self.id)]["Default Text"]
+            options = {
+                1: {
+                    "Text": "Bye",
+                    "Link": None,
+                    "Tags": [],
+                    "End Dialog": True
+                }
+            }
+            # TODO THere should be a loop here that looks at all available conversations and quests and shows them
+        # If the NPC should be into a conversation
+        else:
+            text = self.dialog_shortcut[str(self.dialog_step)]["Text"]
+            options = self.dialog_shortcut[str(self.dialog_step)]["Options"]
 
         return text, options
 
@@ -97,35 +111,44 @@ class QuestNPC(NonPlayerCharacter):
         for image in self.images:
             self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.id = ID
-        self.dialog_step = 1
+        self.dialog_step = None
+        self.default_text = "Hello Traveler"
 
     def handle_dialog(self, quest, conv_link, end_dialog, tags):
-        logging.info(f"Tags: {tags}")
-        self.quest_id = quest
-        self.dialog_step = conv_link
-        if end_dialog:
-            self.reset_dialog()
+        # Handle dialog on "Empty" Screen
+        if self.dialog_step is None:
+            logging.info("Handling empty dialog screen")
+            if conv_link == 1:
+                self.reset_dialog()
+
+        # Handle dialog in quest or conv screens
         else:
-            self.reset_dialog()
-            self.active = True
+            logging.info(f"Tags: {tags}")
+            self.quest_id = quest
+            self.dialog_step = conv_link
+            if end_dialog:
+                self.reset_dialog()
+            else:
+                self.reset_dialog()
+                self.active = True
 
-        # Handle Non-Quest Tags Here
-        if "Health" in tags:
-            logging.info("Giving Player Health")
-            self.game.player.add_item("Health")
+            # Handle Non-Quest Tags Here
+            if "Health" in tags:
+                logging.info("Giving Player Health")
+                self.game.player.add_item("Health")
 
-        # Handle Quests here
-        if self.quest_id is not None:
-            if "Start" in tags:
-                self.dialog_step = Quests.change_quest_status(self.quest_id, "Active")
-            if "Cancel" in tags:
-                self.dialog_step = Quests.update_quest_progress(self.quest_id, abandon=True)
-            if "Close" in tags:
-                self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
-                self.handle_quest_reward()
-                self.quest_id = None
-            if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
-                Quests.change_quest_status(self.quest_id, "Complete")
+            # Handle Quests here
+            if self.quest_id is not None:
+                if "Start" in tags:
+                    self.dialog_step = Quests.change_quest_status(self.quest_id, "Active")
+                if "Cancel" in tags:
+                    self.dialog_step = Quests.update_quest_progress(self.quest_id, abandon=True)
+                if "Close" in tags:
+                    self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
+                    self.handle_quest_reward()
+                    self.quest_id = None
+                if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
+                    Quests.change_quest_status(self.quest_id, "Complete")
 
     def handle_quest_reward(self):
         reward = Quests.Quests["Quest ID"][self.quest_id]["Reward"]
@@ -136,7 +159,6 @@ class QuestNPC(NonPlayerCharacter):
             self.game.player.add_item("Health")
         else:
             logging.warning("This reward has not been added to the code yet")
-
 
     # Check if quest is complete
     def quest_status(self):
@@ -174,10 +196,13 @@ class QuestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                option_shortcut = self.dialog_shortcut[str(self.dialog_step)]
-                # Handle the consequences of the dialog action
-                self.handle_dialog(option_shortcut["Quest_ID"],
-                                   option_shortcut["Options"][self.game.dialog_selection]["Link"],
-                                   option_shortcut["Options"][self.game.dialog_selection]["End Dialog"],
-                                   option_shortcut["Options"][self.game.dialog_selection]["Tags"],
-                                   )
+                if self.dialog_step is None:
+                    self.reset_dialog()
+                else:
+                    option_shortcut = self.dialog_shortcut[str(self.dialog_step)]
+                    # Handle the consequences of the dialog action
+                    self.handle_dialog(option_shortcut["Quest_ID"],
+                                       option_shortcut["Options"][self.game.dialog_selection]["Link"],
+                                       option_shortcut["Options"][self.game.dialog_selection]["End Dialog"],
+                                       option_shortcut["Options"][self.game.dialog_selection]["Tags"],
+                                       )

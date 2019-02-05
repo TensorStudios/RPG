@@ -7,7 +7,7 @@ from Sprites import collide_with_walls, collide_hit_rect
 from NPC import Quests
 import json
 
-with open("NPC/conversations.json") as json_file:
+with open("NPC/conversations_alpha.json") as json_file:
     NPC_id = json.load(json_file)
 vec = pg.math.Vector2
 
@@ -42,7 +42,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         self.dialog_step = None
         self.id = ID
         self.quest_id = None
-        self.dialog_shortcut = NPC_id[str(self.id)]["Dialog ID"]
+        self.dialog_shortcut = None # We will need to pass in the relevant quest or conversation location
 
     # Check if the NPC was clicked and the player is close enough. Also checks if the player has walked away
     def get_clicked(self):
@@ -74,15 +74,35 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         # If the NPC should be at the "Empty Dialog screen"
         if self.dialog_step is None:
             text = NPC_id[str(self.id)]["Default Text"]
-            options = {
-                1: {
-                    "Text": "Bye",
-                    "Link": None,
-                    "Tags": [],
-                    "End Dialog": True
-                }
+            option_num = 1
+            options = {}
+            # Loop Through conversations for NPC and add the Node if it is active
+            for conv_id, values in NPC_id[str(self.id)]["Conversations"].items():
+                if NPC_id[str(self.id)]["Conversations"][conv_id]["Active"] is True:
+                    options[option_num] = {
+                        "Text": NPC_id[str(self.id)]["Conversations"][conv_id]["Node Title"],
+                        "Link": None,
+                        "Tags": [],
+                        "End Dialog": True,
+                    }
+                    option_num += 1
+            # Loop Through Quests for NPC and add the Node if it is active
+            for quest_id, values in NPC_id[str(self.id)]["Quests"].items():
+                if NPC_id[str(self.id)]["Quests"][quest_id]["Active"] is True:
+                    options[option_num] = {
+                        "Text": NPC_id[str(self.id)]["Quests"][quest_id]["Node Title"],
+                        "Link": None,
+                        "Tags": [],
+                        "End Dialog": True,
+                    }
+                    option_num += 1
+            options[option_num] = {
+                "Text": "Bye",
+                "Link": None,
+                "Tags": [],
+                "End Dialog": True
             }
-            # TODO THere should be a loop here that looks at all available conversations and quests and shows them
+
         # If the NPC should be into a conversation
         else:
             text = self.dialog_shortcut[str(self.dialog_step)]["Text"]

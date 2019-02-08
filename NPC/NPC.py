@@ -65,6 +65,9 @@ class NonPlayerCharacter(pg.sprite.Sprite):
     def reset_dialog(self):
         self.game.dialog = False
         self.game.dialog_selection = None
+        self.game.dialog_link = None
+        self.game.dialog_tags = None
+        self.game.dialog_end_d = None
         self.game.dialog_text = ""
         self.game.dialog_options = []
         self.active = False
@@ -81,7 +84,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
                 if NPC_id[str(self.id)]["Conversations"][conv_id]["Active"] is True:
                     options[option_num] = {
                         "Text": NPC_id[str(self.id)]["Conversations"][conv_id]["Node Title"],
-                        "Link": None,
+                        "Link": ["Conversations", conv_id, "Step 1"],
                         "Tags": [],
                         "End Dialog": True,
                     }
@@ -91,7 +94,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
                 if NPC_id[str(self.id)]["Quests"][quest_id]["Active"] is True:
                     options[option_num] = {
                         "Text": NPC_id[str(self.id)]["Quests"][quest_id]["Node Title"],
-                        "Link": None,
+                        "Link": ["Quests", quest_id],
                         "Tags": [],
                         "End Dialog": True,
                     }
@@ -105,8 +108,9 @@ class NonPlayerCharacter(pg.sprite.Sprite):
 
         # If the NPC should be into a conversation
         else:
-            text = self.dialog_shortcut[str(self.dialog_step)]["Text"]
-            options = self.dialog_shortcut[str(self.dialog_step)]["Options"]
+            text = self.dialog_shortcut["Text"]
+            options = self.dialog_shortcut["Options"]
+            # print(self.dialog_shortcut)
 
         return text, options
 
@@ -134,41 +138,52 @@ class QuestNPC(NonPlayerCharacter):
         self.dialog_step = None
         self.default_text = "Hello Traveler"
 
-    def handle_dialog(self, quest, conv_link, end_dialog, tags):
+    def handle_dialog(self, quest, conv_link, end_dialog, tags, force_close=False):
         # Handle dialog on "Empty" Screen
-        if self.dialog_step is None:
-            logging.info("Handling empty dialog screen")
-            if conv_link == 1:
-                self.reset_dialog()
-
-        # Handle dialog in quest or conv screens
+        # logging.info("Quest: ", quest, "conv link: ", conv_link, "Dialog Step: ", self.dialog_step)
+        if force_close:
+            self.reset_dialog()
         else:
-            logging.info(f"Tags: {tags}")
-            self.quest_id = quest
-            self.dialog_step = conv_link
-            if end_dialog:
-                self.reset_dialog()
-            else:
+            if self.dialog_step is None:
+                logging.info("Handling empty dialog screen")
+                self.dialog_shortcut = NPC_id[str(self.id)][self.game.dialog_link[0]][self.game.dialog_link[1]][self.game.dialog_link[2]]
+                dialog_step = self.game.dialog_link[2]
                 self.reset_dialog()
                 self.active = True
+                self.dialog_step = dialog_step
 
-            # Handle Non-Quest Tags Here
-            if "Health" in tags:
-                logging.info("Giving Player Health")
-                self.game.player.add_item("Health")
+            # Handle dialog in quest or conv screens
+            else:
+                logging.info(f"Tags: {tags}")
+                self.quest_id = quest
+                if conv_link[0] == "Conversations" and conv_link[2] is not None:
+                    print("I am here")
+                    self.dialog_step = NPC_id[str(self.id)]["Conversations"][conv_link[1]][conv_link[2]]
+                if end_dialog:
+                    self.reset_dialog()
+                else:
+                    dialog_step = self.game.dialog_link[2]
+                    self.reset_dialog()
+                    self.dialog_step = dialog_step
+                    self.active = True
 
-            # Handle Quests here
-            if self.quest_id is not None:
-                if "Start" in tags:
-                    self.dialog_step = Quests.change_quest_status(self.quest_id, "Active")
-                if "Cancel" in tags:
-                    self.dialog_step = Quests.update_quest_progress(self.quest_id, abandon=True)
-                if "Close" in tags:
-                    self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
-                    self.handle_quest_reward()
-                    self.quest_id = None
-                if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
-                    Quests.change_quest_status(self.quest_id, "Complete")
+                # Handle Non-Quest Tags Here
+                if "Health" in tags:
+                    logging.info("Giving Player Health")
+                    self.game.player.add_item("Health")
+
+                # Handle Quests here
+                if self.quest_id is not None:
+                    if "Start" in tags:
+                        self.dialog_step = Quests.change_quest_status(self.quest_id, "Active")
+                    if "Cancel" in tags:
+                        self.dialog_step = Quests.update_quest_progress(self.quest_id, abandon=True)
+                    if "Close" in tags:
+                        self.dialog_step = Quests.change_quest_status(self.quest_id, "Close")
+                        self.handle_quest_reward()
+                        self.quest_id = None
+                    if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
+                        Quests.change_quest_status(self.quest_id, "Complete")
 
     def handle_quest_reward(self):
         reward = Quests.Quests["Quest ID"][self.quest_id]["Reward"]
@@ -216,13 +231,32 @@ class QuestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                if self.dialog_step is None:
-                    self.reset_dialog()
-                else:
-                    option_shortcut = self.dialog_shortcut[str(self.dialog_step)]
-                    # Handle the consequences of the dialog action
-                    self.handle_dialog(option_shortcut["Quest_ID"],
-                                       option_shortcut["Options"][self.game.dialog_selection]["Link"],
-                                       option_shortcut["Options"][self.game.dialog_selection]["End Dialog"],
-                                       option_shortcut["Options"][self.game.dialog_selection]["Tags"],
-                                       )
+                if self.game.dialog_link is None:
+                    print("This should only appear when 'bye' is pressed")
+                    self.handle_dialog(quest=None,
+                                       conv_link=self.game.dialog_selection,
+                                       end_dialog=True,
+                                       tags=[],
+                                       force_close=True)
+
+                elif self.game.dialog_link[0] == "Conversations":
+                    print(self.game.dialog_link)
+                    # option_shortcut = NPC_id[str(self.id)]["Conversations"][self.game.dialog_link[1]][self.game.dialog_link[2]]
+                    # Handle conversation close
+                    if self.dialog_step is None:
+                        print("loop 1")
+                        self.handle_dialog(quest=None,
+                                           conv_link=self.game.dialog_link,
+                                           end_dialog=True,
+                                           tags=[])
+
+                    # Handle Normal conversaiton
+                    else:
+                        print("loop 2")
+                        print(self.game.dialog_link)
+                        self.handle_dialog(quest=None,
+                                           conv_link=self.game.dialog_link,
+                                           end_dialog=self.game.dialog_end_d,
+                                           tags=self.game.dialog_tags)
+                elif self.game.dialog_selection[0] == "Quests":
+                    pass

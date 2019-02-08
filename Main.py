@@ -119,6 +119,10 @@ class Game:
         self.dialog_options = []
         self.pause_menu_selection = None
 
+        # Click delay for conversations
+        self.conv_click_delay = 500
+        self.last_conv_click = pg.time.get_ticks()
+
         # Load map, spawn appropriate sprites
         logging.info("Placing sprites and objects on map")
         for tile_object in self.map.tmxdata.objects:
@@ -266,6 +270,9 @@ class Game:
         # Draw options
         for position, option in options.items():
             option_text = option["Text"]
+            option_link = option["Link"]
+            option_tags = option["Tags"]
+            option_end_d = option["End Dialog"]
             rect = pg.Rect(x + 5, y + 5 + (int(position) * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
             if rect.collidepoint((pg.mouse.get_pos() + vec(0,5))):
@@ -273,8 +280,15 @@ class Game:
                                20, BLUE, x + 5, y + (int(position) * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC
                 if mouse[0]:
-                    logging.debug(f"Dialog option selected: {position} ")
-                    self.dialog_selection = str(position)
+                    now = pg.time.get_ticks()
+                    if now - self.conv_click_delay > self.last_conv_click:
+                        self.last_conv_click = now
+                        logging.info(f"Dialog option selected: {position} ")
+                        print("Clicked!", str(position))
+                        self.dialog_selection = str(position)
+                        self.dialog_link = option_link
+                        self.dialog_tags = option_tags
+                        self.dialog_end_d = option_end_d
             else:
                 self.draw_text(option_text, self.inventory_font,
                                20, WHITE, x + 5, y + (int(position) * text_height), "w")

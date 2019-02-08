@@ -39,13 +39,13 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "Thanks",
-                            "Link": None,
+                            "Link": ["Conversations", 1, None],
                             "Tags": ["Deactivate", "Health"],
                             "End Dialog": True
                         },
                         2: {
                             "Text": "What is this?",
-                            "Link": "Step 2",
+                            "Link": ["Conversations", 1, "Step 2"],
                             "Tags": [],
                             "End Dialog": False
                         },
@@ -56,7 +56,7 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "Thanks",
-                            "Link": 3,
+                            "Link": None,
                             "Tags": ["Deactivate", "Health"],
                             "End Dialog": True
                         },

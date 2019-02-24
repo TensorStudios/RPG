@@ -7,7 +7,7 @@ from Sprites import collide_with_walls, collide_hit_rect
 from NPC import Quests
 import json
 
-with open("NPC/conversations_alpha.json") as json_file:
+with open("NPC/conversations.json") as json_file:
     NPC_id = json.load(json_file)
 vec = pg.math.Vector2
 
@@ -112,7 +112,6 @@ class NonPlayerCharacter(pg.sprite.Sprite):
         else:
             text = self.dialog_shortcut["Text"]
             options = self.dialog_shortcut["Options"]
-            # print(self.dialog_shortcut)
 
         return text, options
 
@@ -157,7 +156,6 @@ class QuestNPC(NonPlayerCharacter):
             # Handle dialog in quest or conv screens
             else:
                 logging.info(f"Tags: {tags}")
-                print(f"Tags: {tags}")
                 self.quest_id = quest
                 # set the dialog shortcut so that it properly displays the text
                 self.dialog_next = NPC_id[str(self.id)][conv_link[0]][str(conv_link[1])]["Next"]
@@ -183,10 +181,8 @@ class QuestNPC(NonPlayerCharacter):
 
                 # Handle Quests here
                 if self.quest_id is not None:
-                    print(NPC_id[str(self.id)]["Quests"][str(conv_link[1])])
                     if "Start" in tags:
                         quest_step = Quests.change_quest_status(self.quest_id, "Active")
-                        print(quest_step)
                         self.dialog_step = NPC_id[str(self.id)]["Quests"][str(conv_link[1])][quest_step]
                         self.dialog_shortcut = NPC_id[str(self.id)]["Quests"][str(conv_link[1])][quest_step]
                     if "Cancel" in tags:
@@ -195,8 +191,7 @@ class QuestNPC(NonPlayerCharacter):
                         self.dialog_shortcut = NPC_id[str(self.id)]["Quests"][str(conv_link[1])][quest_step]
                     if "Close" in tags:
                         quest_step = Quests.change_quest_status(self.quest_id, "Close")
-                        self.dialog_step = NPC_id[str(self.id)]["Quests"][str(conv_link[1])][quest_step]
-                        self.dialog_shortcut = NPC_id[str(self.id)]["Quests"][str(conv_link[1])][quest_step]
+                        NPC_id[str(self.id)][conv_link[0]][str(conv_link[1])]["Active"] = False
                         self.handle_quest_reward()
                         self.quest_id = None
                     if self.quest_id is not None and Quests.check_quest_progress(self.quest_id):
@@ -216,7 +211,9 @@ class QuestNPC(NonPlayerCharacter):
     def quest_status(self):
         if self.quest_id is not None:
             if Quests.check_quest_progress(self.quest_id):
-                self.dialog_step = Quests.Quests["Quest ID"][self.quest_id]["Conv Links"]["Complete"]
+                quest_step = Quests.change_quest_status(self.quest_id, "Complete")
+                self.dialog_step = NPC_id[str(self.id)]["Quests"][str(self.quest_id)][quest_step]
+                self.dialog_shortcut = NPC_id[str(self.id)]["Quests"][str(self.quest_id)][quest_step]
 
     def update(self):
         self.get_clicked()
@@ -248,9 +245,7 @@ class QuestNPC(NonPlayerCharacter):
                 self.game.dialog = True
                 self.game.dialog_text, self.game.dialog_options = self.get_dialog_text_and_options()
             else:
-                print("dialog link", self.game.dialog_link)
                 if self.game.dialog_link is None:
-                    print("This should only appear when 'bye' is pressed")
                     self.handle_dialog(quest=None,
                                        conv_link=self.game.dialog_selection,
                                        end_dialog=True,
@@ -258,11 +253,8 @@ class QuestNPC(NonPlayerCharacter):
                                        force_close=True)
 
                 elif self.game.dialog_link[0] == "Conversations":
-                    print(self.game.dialog_link)
                     # Handle conversation close
                     if self.dialog_step is None:
-                        print("loop 1")
-                        # print("Loop 1: ", self.game.dialog_link)
                         self.handle_dialog(quest=None,
                                            conv_link=self.game.dialog_link,
                                            end_dialog=True,
@@ -270,23 +262,16 @@ class QuestNPC(NonPlayerCharacter):
 
                     # Handle Normal conversaiton
                     else:
-                        print("loop 2")
-                        print(self.game.dialog_link)
-                        print(self.dialog_step)
                         self.handle_dialog(quest=None,
                                            conv_link=self.game.dialog_link,
                                            end_dialog=self.game.dialog_end_d,
                                            tags=self.game.dialog_tags)
                 # Handle quests here
                 elif self.game.dialog_link[0] == "Quests":
-                    # Todo dynamically find the quest id
-                    quest = 1
+                    quest = self.game.dialog_link[1]
 
-                    print(self.game.dialog_link)
                     # Handle conversation close
                     if self.dialog_step is None:
-                        print("loop 1")
-                        # print("Loop 1: ", self.game.dialog_link)
                         self.handle_dialog(quest=quest,
                                            conv_link=self.game.dialog_link,
                                            end_dialog=True,
@@ -294,9 +279,6 @@ class QuestNPC(NonPlayerCharacter):
 
                     # Handle Normal quest dialog
                     else:
-                        print("loop 2")
-                        print(self.game.dialog_link)
-                        print(self.dialog_step)
                         self.handle_dialog(quest=quest,
                                            conv_link=self.game.dialog_link,
                                            end_dialog=self.game.dialog_end_d,

@@ -285,7 +285,6 @@ class Game:
                     if now - self.conv_click_delay > self.last_conv_click:
                         self.last_conv_click = now
                         logging.info(f"Dialog option selected: {position} ")
-                        print("Clicked!", str(position))
                         self.dialog_selection = str(position)
                         self.dialog_link = option_link
                         self.dialog_tags = option_tags

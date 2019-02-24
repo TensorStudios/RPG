@@ -18,10 +18,10 @@ Quests = {
             "End NPC ID": 2,
             "Prerequisites": None,
             "Conv Links": {
-                "Not Started": 1,
-                "Active": 2,
-                "Complete": 4,
-                "Close": 5
+                "Not Started": "Step 1",
+                "Active": "Step 2",
+                "Complete": "Step 4",
+                "Close": 5 # Need to update this
             },
             "Requirement": {
                 "Description": "Kill 5 Zombies",

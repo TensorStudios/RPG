@@ -34,6 +34,7 @@ NPC_id = {
             1: {
                 "Node Title": "Let's Talk",
                 "Active": True,
+                "Next": 2,
                 "Step 1": {
                     "Text": "It's dangerous to go alone, take this",
                     "Options": {
@@ -56,7 +57,7 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "Thanks",
-                            "Link": None,
+                            "Link": ["Conversations", 1, None],
                             "Tags": ["Deactivate", "Health"],
                             "End Dialog": True
                         },
@@ -66,12 +67,16 @@ NPC_id = {
             2: {
                 "Node Title": "Please Sir...",
                 "Active": False,
+                "Next": None,
                 "Step 1": {
                     "Text": "You already have my healthpack, back off man",
                     "Options": {
-                        "Link": None,
-                        "Tags": [],
-                        "End Dialog": True
+                        1: {
+                            "Text": "...",
+                            "Link": None,
+                            "Tags": [],
+                            "End Dialog": True
+                        },
                     },
                 }
             },
@@ -86,6 +91,7 @@ NPC_id = {
             1: {
                 "Node Title": "Anything else?",
                 "Active": False,
+                "Next": None,
                 "Step 1": {
                     "Text": "Thanks for solving our problems",
                     "Options": {
@@ -103,18 +109,19 @@ NPC_id = {
             1: {
                 "Node Title": "! We need help",
                 "Active": True,
+                "Next": 2,
                 "Step 1": {
                     "Text": "Would you kindly remove these Zombies?",
                     "Options": {
                         1: {
                             "Text": "Sure!",
-                            "Link": "Step 2",
+                            "Link": ["Quests", 1, "Step 2"],
                             "Tags": ["Start"],
                             "End Dialog": True,
                         },
                         2: {
                             "Text": "Hell no!",
-                            "Link": "Step 1",
+                            "Link": ["Quests", 1, "Step 1"],
                             "Tags": [],
                             "End Dialog": True,
                         }
@@ -125,13 +132,13 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "On it!",
-                            "Link": 2,
+                            "Link": ["Quests", 1, "Step 2"],
                             "Tags": [],
                             "End Dialog": True,
                         },
                         2: {
                             "Text": "Nah ...",
-                            "Link": "Step 3",
+                            "Link": ["Quests", 1, "Step 3"],
                             "Tags": [],
                             "End Dialog": False,
                         },
@@ -142,7 +149,7 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "Ok",
-                            "Link": 1,
+                            "Link": ["Quests", 1, "Step 1"],
                             "Tags": ["Cancel"],
                             "End Dialog": True,
                         }
@@ -153,8 +160,8 @@ NPC_id = {
                     "Options": {
                         1: {
                             "Text": "Thanks!",
-                            "Link": 5,
-                            "Tags": ["Close"],
+                            "Link": None,
+                            "Tags": ["Deactivate", "Close"],
                             "End Dialog": True,
                         },
                     },

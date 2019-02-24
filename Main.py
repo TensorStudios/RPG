@@ -268,6 +268,7 @@ class Game:
         mouse = pg.mouse.get_pressed()
 
         # Draw options
+        # print("Options", options)
         for position, option in options.items():
             option_text = option["Text"]
             option_link = option["Link"]

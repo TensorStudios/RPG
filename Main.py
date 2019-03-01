@@ -19,7 +19,6 @@ from Sprites import *
 from os import path, chdir, getcwd
 from tilemap import *
 from NPC.NPC import QuestNPC
-from NPC.Conversations import NPC_id
 from NPC.Quests import Quests
 from Player.PlayerData import PLAYER
 from Interface.UI import *
@@ -119,6 +118,10 @@ class Game:
         self.dialog_text = ""
         self.dialog_options = []
         self.pause_menu_selection = None
+
+        # Click delay for conversations
+        self.conv_click_delay = 500
+        self.last_conv_click = pg.time.get_ticks()
 
         # Load map, spawn appropriate sprites
         logging.info("Placing sprites and objects on map")
@@ -265,20 +268,30 @@ class Game:
         mouse = pg.mouse.get_pressed()
 
         # Draw options
+        # print("Options", options)
         for position, option in options.items():
             option_text = option["Text"]
-            rect = pg.Rect(x + 5, y + 5 + (position * text_height), box_width, text_height)
+            option_link = option["Link"]
+            option_tags = option["Tags"]
+            option_end_d = option["End Dialog"]
+            rect = pg.Rect(x + 5, y + 5 + (int(position) * text_height), box_width, text_height)
             # Change dialog text color, just like in inventory
-            if rect.collidepoint(pg.mouse.get_pos()):
+            if rect.collidepoint((pg.mouse.get_pos() + vec(0,5))):
                 self.draw_text(option_text, self.inventory_font,
-                               20, BLUE, x + 5, y + (position * text_height), "w")
+                               20, BLUE, x + 5, y + (int(position) * text_height), "w")
                 # If dialog option is clicked, pass that to the NPC
                 if mouse[0]:
-                    logging.debug(f"Dialog option selected: {position} ")
-                    self.dialog_selection = position
+                    now = pg.time.get_ticks()
+                    if now - self.conv_click_delay > self.last_conv_click:
+                        self.last_conv_click = now
+                        logging.info(f"Dialog option selected: {position} ")
+                        self.dialog_selection = str(position)
+                        self.dialog_link = option_link
+                        self.dialog_tags = option_tags
+                        self.dialog_end_d = option_end_d
             else:
                 self.draw_text(option_text, self.inventory_font,
-                               20, WHITE, x + 5, y + (position * text_height), "w")
+                               20, WHITE, x + 5, y + (int(position) * text_height), "w")
 
         # Draw text
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")

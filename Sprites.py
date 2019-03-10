@@ -258,8 +258,10 @@ class Player(pg.sprite.Sprite):
     def collect_exp(self, exp):
         self.exp += exp
         logging.info(f"Player has gained {exp} exp and now has {self.exp} exp")
+        logging.info(f"current level: {self.level}, exp needed: {get_exp_requirement(self.level)}")
         if self.exp >= get_exp_requirement(self.level):
-            self.level = int(self.exp / PLAYER["Level Up"]["Exp Required"]) + 1
+            # Potential bug: IF player receives more than one level of exp, this will cause weird issues
+            self.level += 1
             self.damage_modifier *= PLAYER["Level Up"]["Dmg Increase"]
             PLAYER["Health"] += PLAYER["Level Up"]["Health Increase"]
             self.health = PLAYER["Health"]

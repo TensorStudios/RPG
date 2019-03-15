@@ -66,6 +66,7 @@ class Game:
 
         # Load Spritesheet image for animations
         logging.debug("loading spritesheet imgs")
+        self.spritesheet_p = Spritesheet(resource_path(img_folder + "Hero.png"))
         self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
         self.spritesheet_k_l = Spritesheet(resource_path(img_folder + "Knight Left.png"))
         self.spritesheet_k_a_r = Spritesheet(resource_path(img_folder + "Knight Attack Pose.png"))
@@ -108,7 +109,7 @@ class Game:
         self.items = pg.sprite.Group()
         self.spawn_zones = []
         logging.info("Loading map")
-        self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
+        self.map = TiledMap(resource_path(self.map_folder + "Functional_Test.tmx"))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
         logging.info("reseting class variables")

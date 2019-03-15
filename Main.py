@@ -75,7 +75,6 @@ class Game:
         self.spritesheet_fire_attack = Spritesheet(resource_path(img_folder + "Fire Attack.png"))
         self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
         self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
-
         self.weapon_animations = {
             "sword": {
                 "Frame Rate": 100,
@@ -92,9 +91,6 @@ class Game:
                 }
             }
         }
-        for weapon in self.weapon_animations:
-            for image in self.weapon_animations[weapon]["Images"]:
-                self.weapon_animations[weapon]["Images"][image].set_colorkey(BG_SPRITE_COLOR)
         logging.debug("Success")
         logging.info("Successfully loaded all data")
 

@@ -40,7 +40,7 @@ def get_exp_requirement(level):
         return round(9925 * (1.063975 ** (level - 49)))
     elif 54 < level < 60:
         return round(13532 * (1.056363 ** (level - 54)))
-    elif 59 < level:
+    elif 59 < level < 100:
         return round(17801 * (1.00315265 ** (level - 59)))
 
 

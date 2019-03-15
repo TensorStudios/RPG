@@ -56,14 +56,18 @@ class Player(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.images = {
-            "Walk_r_1": self.game.spritesheet_k_r.get_image(0, 0, 100, 100),
-            "Walk_r_2": self.game.spritesheet_k_r.get_image(100, 0, 100, 100),
-            "Walk_r_3": self.game.spritesheet_k_r.get_image(0, 100, 100, 100),
-            "Walk_r_4": self.game.spritesheet_k_r.get_image(100, 100, 100, 100),
-            "Walk_l_1": self.game.spritesheet_k_l.get_image(0, 0, 100, 100),
-            "Walk_l_2": self.game.spritesheet_k_l.get_image(100, 0, 100, 100),
-            "Walk_l_3": self.game.spritesheet_k_l.get_image(0, 100, 100, 100),
-            "Walk_l_4": self.game.spritesheet_k_l.get_image(100, 100, 100, 100),
+            "Walk_r_1": self.game.spritesheet_p.get_image(78, 72, 26, 36),
+            "Walk_r_2": self.game.spritesheet_p.get_image(104, 72, 26, 36),
+            "Walk_r_3": self.game.spritesheet_p.get_image(130, 72, 26, 36),
+            "Walk_l_1": self.game.spritesheet_p.get_image(78, 36, 26, 36),
+            "Walk_l_2": self.game.spritesheet_p.get_image(104, 36, 26, 36),
+            "Walk_l_3": self.game.spritesheet_p.get_image(130, 36, 26, 36),
+            "Walk_u_1": self.game.spritesheet_p.get_image(78, 108, 26, 36),
+            "Walk_u_2": self.game.spritesheet_p.get_image(104, 108, 26, 36),
+            "Walk_u_3": self.game.spritesheet_p.get_image(130, 108, 26, 36),
+            "Walk_d_1": self.game.spritesheet_p.get_image(78, 0, 26, 36),
+            "Walk_d_2": self.game.spritesheet_p.get_image(104, 0, 26, 36),
+            "Walk_d_3": self.game.spritesheet_p.get_image(130, 0, 26, 36),
             "Attack_r_1": self.game.spritesheet_k_a_r.get_image(0, 0, 100, 100),
             "Attack_r_2": self.game.spritesheet_k_a_r.get_image(100, 0, 100, 100),
             "Attack_r_3": self.game.spritesheet_k_a_r.get_image(0, 100, 100, 100),
@@ -73,28 +77,31 @@ class Player(pg.sprite.Sprite):
             "Attack_l_3": self.game.spritesheet_k_a_l.get_image(0, 100, 100, 100),
             "Attack_l_4": self.game.spritesheet_k_a_l.get_image(100, 100, 100, 100),
         }
-        self.walk_cycle = cycle(range(4))
+
+        self.walk_cycle = cycle(range(3))
         self.frame = 0
         self.walk_right = [self.images["Walk_r_1"],
                            self.images["Walk_r_2"],
-                           self.images["Walk_r_3"],
-                           self.images["Walk_r_4"]]
+                           self.images["Walk_r_3"]]
+
         self.walk_left = [self.images["Walk_l_1"],
-                           self.images["Walk_l_2"],
-                           self.images["Walk_l_3"],
-                           self.images["Walk_l_4"]]
+                          self.images["Walk_l_2"],
+                          self.images["Walk_l_3"]]
+
         self.attack_right = [self.images["Attack_r_1"],
-                           self.images["Attack_r_2"],
-                           self.images["Attack_r_3"],
-                           self.images["Attack_r_4"]]
+                             self.images["Attack_r_2"],
+                             self.images["Attack_r_3"],
+                             self.images["Attack_r_4"]]
+
         self.attack_left = [self.images["Attack_l_1"],
-                           self.images["Attack_l_2"],
-                           self.images["Attack_l_3"],
-                           self.images["Attack_l_4"]]
+                            self.images["Attack_l_2"],
+                            self.images["Attack_l_3"],
+                            self.images["Attack_l_4"]]
+
         self.image = self.walk_right[self.frame]
         self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
         for image in self.images:
-            self.images[image].set_colorkey(BG_SPRITE_COLOR)
+            self.images[image].set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.hit_rect = PLAYER["Hit Rect"]

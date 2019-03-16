@@ -418,7 +418,7 @@ class Mob(pg.sprite.Sprite):
     def highlight_on_mouseover(self):
         mouse = pg.mouse.get_pos()
 
-        if self.game.camera.apply_rect(self.hit_rect).collidepoint(mouse):
+        if self.game.camera.apply_rect(self.rect).collidepoint(mouse):
             # print("I am moused over")
             self.image.fill((255, 0, 0, 200), special_flags=pg.BLEND_RGBA_MULT)
             self.targeted = True

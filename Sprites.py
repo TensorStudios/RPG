@@ -40,11 +40,11 @@ def collide_with_walls(sprite, group, dir):
 class Spritesheet:
     # utility class for loading and parsing sprites
     def __init__(self, filename):
-        self.spritesheet = pg.image.load(filename).convert()
+        self.spritesheet = pg.image.load(filename)
 
     def get_image(self, x, y, width, height):
         # grab an image out of a larger spritesheet
-        image = pg.Surface((width, height))
+        image = pg.Surface((width, height), pg.SRCALPHA)
         image.blit(self.spritesheet, (0, 0), (x, y, width, height))
         return image
 
@@ -174,31 +174,39 @@ class Player(pg.sprite.Sprite):
                 logging.warning(f"An inproper player ability was called: {ability}")
                 WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
 
-            # Hit all mobs in range
+            # Target enemies by mouse
             for mob in mobs_in_range:
-                # Check if the mob is within the weapon arc
-                # largest degree
-                high_angle = (self.direction + self.attack_arc) % 360
-                # Smallest degree
-                low_angle = (self.direction - self.attack_arc) % 360
-                # The angle of the mob to the player
-                mob_angle = (self.pos - mob.pos).normalize()
-                # Add 180 degrees to make it easy to compare angles
-                mob_angle = vec(0, 0).angle_to(mob_angle) + 180
-
-                # See if the mob angle is within the two angles
-                if high_angle >= mob_angle >= low_angle:
+                if mob.targeted:
                     logging.debug("hit connects")
-                    mob.health -= self.damage
-                # account for if the mob is at a high angle and high_angle is at a low value
-                elif high_angle < 90:
-                    if mob_angle >= 315:
-                        mob_angle -= 360
-                    low_angle -= 360
-                    if high_angle >= mob_angle >= low_angle:
-                        damage = int(self.damage * self.damage_modifier * ability_modifier)
-                        logging.info(f"hit connects for {damage} damage")
-                        mob.health -= damage
+                    damage = int(self.damage * self.damage_modifier * ability_modifier)
+                    logging.info(f"hit connects for {damage} damage")
+                    mob.health -= damage
+
+            # # Hit all mobs in range
+            # for mob in mobs_in_range:
+            #     # Check if the mob is within the weapon arc
+            #     # largest degree
+            #     high_angle = (self.direction + self.attack_arc) % 360
+            #     # Smallest degree
+            #     low_angle = (self.direction - self.attack_arc) % 360
+            #     # The angle of the mob to the player
+            #     mob_angle = (self.pos - mob.pos).normalize()
+            #     # Add 180 degrees to make it easy to compare angles
+            #     mob_angle = vec(0, 0).angle_to(mob_angle) + 180
+            #
+            #     # See if the mob angle is within the two angles
+            #     if high_angle >= mob_angle >= low_angle:
+            #         logging.debug("hit connects")
+            #         mob.health -= self.damage
+            #     # account for if the mob is at a high angle and high_angle is at a low value
+            #     elif high_angle < 90:
+            #         if mob_angle >= 315:
+            #             mob_angle -= 360
+            #         low_angle -= 360
+            #         if high_angle >= mob_angle >= low_angle:
+            #             damage = int(self.damage * self.damage_modifier * ability_modifier)
+            #             logging.info(f"hit connects for {damage} damage")
+            #             mob.health -= damage
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
@@ -227,10 +235,15 @@ class Player(pg.sprite.Sprite):
             movey = True
         if movex and movey:
             self.vel *= 0.7071
-        if keys[pg.K_SPACE]:
-            self.attack()
-        if keys[pg.K_q]:
-            self.attack(ability="Fire Attack")
+
+        # Attack keys
+
+        if self.game.dialog is False:
+            click = pg.mouse.get_pressed()
+            if click == (1, 0, 0):
+                self.attack()
+            if click == (0, 0, 1):
+                self.attack(ability="Fire Attack")
 
     def get_direction(self):
         # find what direction the player is facing
@@ -336,9 +349,13 @@ class Mob(pg.sprite.Sprite):
             "Zombie_r": self.game.spritesheet_z_r.get_image(0, 0, 100, 100),
             "Zombie_l": self.game.spritesheet_z_l.get_image(0, 0, 100, 100)
         }
-        for image in self.images:
-            self.images[image].set_colorkey(BG_SPRITE_COLOR)
+        # for image in self.images:
+            # self.images[image].set_colorkey(BG_SPRITE_COLOR)
+            # self.images[image].convert_alpha()
+            # self.images[image].fill((0,0,0,0))
         self.image = self.images["Zombie_r"]
+        self.highlight = False
+        self.targeted = False
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.hit_rect = MOB_HIT_RECT.copy()
@@ -401,6 +418,16 @@ class Mob(pg.sprite.Sprite):
                 logging.info(f"Adding to counter for quest id: {self.quests}")
                 Quests.update_quest_progress(quest, 1)
 
+    def highlight_on_mouseover(self):
+        mouse = pg.mouse.get_pos()
+
+        if self.game.camera.apply_rect(self.rect).collidepoint(mouse):
+            # print("I am moused over")
+            self.image.fill((255, 0, 0, 200), special_flags=pg.BLEND_RGBA_MULT)
+            self.targeted = True
+        else:
+            self.targeted = False
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
@@ -430,11 +457,13 @@ class Mob(pg.sprite.Sprite):
                 self.image = self.images["Zombie_r"].copy()
             else:
                 self.image = self.images["Zombie_l"].copy()
+                self.image.convert_alpha()
             self.draw_health()
             collide_with_walls(self, self.game.walls, 'x')
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
+            self.highlight_on_mouseover()
 
     def draw_health(self):
         if self.health > 60:

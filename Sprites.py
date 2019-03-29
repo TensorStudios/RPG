@@ -8,6 +8,15 @@ import time
 from NPC import Quests
 from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER, get_exp_requirement
+from os import path, chdir, getcwd
+import sys
+
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return path.join(sys._MEIPASS, relative_path)
+    return path.join(path.abspath("."), relative_path)
+
 
 vec = pg.math.Vector2
 
@@ -180,7 +189,7 @@ class Player(pg.sprite.Sprite):
                     logging.debug("hit connects")
                     damage = int(self.damage * self.damage_modifier * ability_modifier)
                     logging.info(f"hit connects for {damage} damage")
-                    mob.health -= damage
+                    mob.take_damage(damage)
 
             # # Hit all mobs in range
             # for mob in mobs_in_range:
@@ -376,6 +385,12 @@ class Mob(pg.sprite.Sprite):
         self.spawn_number = len(self.game.mobs)
         # add a list of all of the quests this mob is a target for
         self.quests = [1]
+        # show damage number
+        self.show_damage = False
+        self.damage_show_time = 200
+        self.damage_show_current = pg.time.get_ticks()
+        self.floating_dmg_amount = None
+        self.floating_dmg_font = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 35)
         logging.info(f"Created Mob {self.spawn_number}")
 
     def __str__(self):
@@ -428,6 +443,12 @@ class Mob(pg.sprite.Sprite):
         else:
             self.targeted = False
 
+    def take_damage(self, damage):
+        self.health -= damage
+        self.show_damage = True
+        self.floating_dmg_amount = damage
+        self.damage_show_current = pg.time.get_ticks()
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
@@ -458,12 +479,24 @@ class Mob(pg.sprite.Sprite):
             else:
                 self.image = self.images["Zombie_l"].copy()
                 self.image.convert_alpha()
+            self.highlight_on_mouseover()
             self.draw_health()
+            # Display floating damage text
+            if self.floating_dmg_amount is not None:
+                now = pg.time.get_ticks()
+                # print(now - self.damage_show_current < self.damage_show_time)
+                if now - self.damage_show_current < self.damage_show_time:
+                    floating_dmg_surface = self.floating_dmg_font.render(str(self.floating_dmg_amount), True, WHITE)
+                    floating_dmg_rect = floating_dmg_surface.get_rect()
+                    floating_dmg_rect.midtop = (self.rect.width / 2, 0)
+                    self.image.blit(floating_dmg_surface, floating_dmg_rect)
+                else:
+                    self.floating_dmg_amount = None
+
             collide_with_walls(self, self.game.walls, 'x')
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
-            self.highlight_on_mouseover()
 
     def draw_health(self):
         if self.health > 60:

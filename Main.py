@@ -16,6 +16,7 @@ import pygame as pg
 import sys
 from Settings import *
 from Sprites import *
+from Player.Player_Classes import Player
 from os import path, chdir, getcwd
 from tilemap import *
 from NPC.NPC import QuestNPC

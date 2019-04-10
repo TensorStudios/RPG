@@ -17,6 +17,10 @@ PLAYER = {
         "Default": {
             "Damage Modifier": 1,
             "Mana Cost": 0
+        },
+        "Charged Shot": {
+            "Damage Modifier": 1.5,
+            "Mana Cost": 5
         }
     },
     "Level Up": {

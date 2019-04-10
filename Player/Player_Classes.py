@@ -5,7 +5,7 @@ from Settings import *
 from NPC import Quests
 from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER, get_exp_requirement
-from Player.Weapon_Animations import WeaponAnimation
+from Player.Weapon_Animations import WeaponAnimation, Arrow
 from Sprites import collide_with_walls
 from Items.Weapons import WEAPONS
 
@@ -329,22 +329,22 @@ class Ranger(Player):
     def __init__(self, game, x, y):
         Player.__init__(self, game, x, y, "Bow")
         self.images = {
-            "Walk_r_1": self.game.spritesheet_k_r.get_image(0, 0, 100, 100),
-            "Walk_r_2": self.game.spritesheet_k_r.get_image(100, 0, 100, 100),
-            "Walk_r_3": self.game.spritesheet_k_r.get_image(0, 100, 100, 100),
-            "Walk_r_4": self.game.spritesheet_k_r.get_image(100, 100, 100, 100),
-            "Walk_l_1": self.game.spritesheet_k_l.get_image(0, 0, 100, 100),
-            "Walk_l_2": self.game.spritesheet_k_l.get_image(100, 0, 100, 100),
-            "Walk_l_3": self.game.spritesheet_k_l.get_image(0, 100, 100, 100),
-            "Walk_l_4": self.game.spritesheet_k_l.get_image(100, 100, 100, 100),
-            "Attack_r_1": self.game.spritesheet_k_a_r.get_image(0, 0, 100, 100),
-            "Attack_r_2": self.game.spritesheet_k_a_r.get_image(100, 0, 100, 100),
-            "Attack_r_3": self.game.spritesheet_k_a_r.get_image(0, 100, 100, 100),
-            "Attack_r_4": self.game.spritesheet_k_a_r.get_image(100, 100, 100, 100),
-            "Attack_l_1": self.game.spritesheet_k_a_l.get_image(0, 0, 100, 100),
-            "Attack_l_2": self.game.spritesheet_k_a_l.get_image(100, 0, 100, 100),
-            "Attack_l_3": self.game.spritesheet_k_a_l.get_image(0, 100, 100, 100),
-            "Attack_l_4": self.game.spritesheet_k_a_l.get_image(100, 100, 100, 100),
+            "Walk_r_1": self.game.spritesheet_r_r.get_image(0, 0, 100, 100),
+            "Walk_r_2": self.game.spritesheet_r_r.get_image(100, 0, 100, 100),
+            "Walk_r_3": self.game.spritesheet_r_r.get_image(0, 100, 100, 100),
+            "Walk_r_4": self.game.spritesheet_r_r.get_image(100, 100, 100, 100),
+            "Walk_l_1": self.game.spritesheet_r_l.get_image(0, 0, 100, 100),
+            "Walk_l_2": self.game.spritesheet_r_l.get_image(100, 0, 100, 100),
+            "Walk_l_3": self.game.spritesheet_r_l.get_image(0, 100, 100, 100),
+            "Walk_l_4": self.game.spritesheet_r_l.get_image(100, 100, 100, 100),
+            "Attack_r_1": self.game.spritesheet_r_r.get_image(0, 0, 100, 100),
+            "Attack_r_2": self.game.spritesheet_r_r.get_image(100, 0, 100, 100),
+            "Attack_r_3": self.game.spritesheet_r_r.get_image(0, 100, 100, 100),
+            "Attack_r_4": self.game.spritesheet_r_r.get_image(100, 100, 100, 100),
+            "Attack_l_1": self.game.spritesheet_r_l.get_image(0, 0, 100, 100),
+            "Attack_l_2": self.game.spritesheet_r_l.get_image(100, 0, 100, 100),
+            "Attack_l_3": self.game.spritesheet_r_l.get_image(0, 100, 100, 100),
+            "Attack_l_4": self.game.spritesheet_r_l.get_image(100, 100, 100, 100),
         }
         self.walk_right = [self.images["Walk_r_1"],
                            self.images["Walk_r_2"],
@@ -385,10 +385,6 @@ class Ranger(Player):
     def attack(self, ability="Default"):
         # Find mobs in range
         ability_modifier = PLAYER["Abilities"][ability]["Damage Modifier"]
-        mobs_in_range = []
-        for mob in self.game.mobs:
-            if self.pos.distance_squared_to(mob.pos) <= self.attack_radius ** 2:
-                mobs_in_range.append(mob)
         # Check if player has enough mana
         cost = PLAYER["Abilities"][ability]["Mana Cost"] < self.mana
         # Check if it has been long enough
@@ -406,22 +402,20 @@ class Ranger(Player):
             else:
                 self.image = self.attack_left[self.update_frame()]
 
-            # Spawn Weapon Animation
-            logging.debug("spawning weapon animation")
-            if ability == "Fire Attack":
-                logging.debug("Fire Weapon Animation")
-                WeaponAnimation(self.attack_speed, self.direction, "fire sword", self.game, self)
-            elif ability == "Default":
-                logging.debug("Normal Weapon Animation")
-                WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
-            else:
-                logging.warning(f"An inproper player ability was called: {ability}")
-                WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+            # # Spawn Weapon Animation
+            # logging.debug("spawning weapon animation")
+            # if ability == "Fire Attack":
+            #     logging.debug("Fire Weapon Animation")
+            #     WeaponAnimation(self.attack_speed, self.direction, "fire sword", self.game, self)
+            # elif ability == "Default":
+            #     logging.debug("Normal Weapon Animation")
+            #     WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+            # else:
+            #     logging.warning(f"An inproper player ability was called: {ability}")
+            #     WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
 
-            # Target enemies by mouse
-            for mob in mobs_in_range:
-                if mob.targeted:
-                    logging.debug("hit connects")
-                    damage = int(self.damage * self.damage_modifier * ability_modifier)
-                    logging.info(f"hit connects for {damage} damage")
-                    mob.health -= damage
+            # Spawn arrow
+            logging.debug("Spawning Arrow sprite")
+            damage = int(self.damage * self.damage_modifier * ability_modifier)
+            _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+            Arrow(self.game, self.rect.center, _dir, damage)

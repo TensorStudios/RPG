@@ -65,6 +65,11 @@ class Game:
         self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
         logging.debug("success")
 
+        # arrow image
+        logging.debug("loading arrow imag")
+        self.arrow_img = pg.image.load(resource_path(img_folder + "Arrow.png")).convert_alpha()
+        logging.debug("success")
+
         # Load Spritesheet image for animations
         logging.debug("loading spritesheet imgs")
         self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
@@ -73,6 +78,8 @@ class Game:
         self.spritesheet_k_a_l = Spritesheet(resource_path(img_folder + "Knight Attack Pose Left.png"))
         self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Attack Animation.png"))
         self.spritesheet_fire_attack = Spritesheet(resource_path(img_folder + "Fire Attack.png"))
+        self.spritesheet_r_r = Spritesheet(resource_path(img_folder + "Knight Bow.png"))
+        self.spritesheet_r_l = Spritesheet(resource_path(img_folder + "Knight Bow Left.png"))
         self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
         self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
         self.weapon_animations = {
@@ -103,6 +110,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        self.projectiles = pg.sprite.Group()
         self.spawn_zones = []
         logging.info("Loading map")
         self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
@@ -193,6 +201,13 @@ class Game:
         for hit in hits:
             self.player.add_item(hit.type)
             hit.kill()
+
+        # Arrow hits mob
+        hits = pg.sprite.groupcollide(self.mobs, self.projectiles, False, True)
+        for mob in hits:
+            for projectile in hits[mob]:
+                mob.health -= projectile.damage
+            mob.vel = vec(0, 0)
 
     # Debug function to draw grid to screen
     def draw_grid(self):

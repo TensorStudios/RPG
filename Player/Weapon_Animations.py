@@ -1,6 +1,8 @@
 import pygame as pg
 from Player.PlayerData import PLAYER
 
+vec = pg.math.Vector2
+
 
 class WeaponAnimation(pg.sprite.Sprite):
     def __init__(self, speed, rotation, _type, game, character):
@@ -50,3 +52,30 @@ class WeaponAnimation(pg.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = self.character.rect.center
                 self.frame += 1
+
+
+class Arrow(pg.sprite.Sprite):
+    def __init__(self, game, pos, _dir, damage):
+        # self._layer = BULLET_LAYER
+        self.groups = game.all_sprites, game.projectiles
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.arrow_img
+        self.image = pg.transform.rotate(self.game.arrow_img, -_dir)
+        self.rect = self.image.get_rect()
+        self.hit_rect = self.rect
+        self.pos = vec(pos)
+        self.rect.center = pos
+        # spread = uniform(-GUN_SPREAD, GUN_SPREAD)
+        direction = vec(1, 0).rotate(_dir)
+        self.vel = direction * 500 # This can be in the settings
+        self.spawn_time = pg.time.get_ticks()
+        self.damage = damage
+
+    def update(self):
+        self.pos += self.vel * self.game.dt
+        self.rect.center = self.pos
+        if pg.sprite.spritecollideany(self, self.game.walls):
+            self.kill()
+        if pg.time.get_ticks() - self.spawn_time > 2000:
+            self.kill()

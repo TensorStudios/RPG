@@ -133,6 +133,7 @@ class Game:
         for tile_object in self.map.tmxdata.objects:
             object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
             if tile_object.name == "Player":
+                # self.player = Knight(self, object_center.x, object_center.y)
                 self.player = Ranger(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
             elif tile_object.name == "Mob":

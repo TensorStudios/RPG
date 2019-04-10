@@ -243,6 +243,7 @@ class Knight(Player):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
+        self.right_click_ability = "Fire Attack"
 
         # stats
         self.health = PLAYER["Health"]
@@ -371,6 +372,7 @@ class Ranger(Player):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
+        self.right_click_ability = "Charged Shot"
 
         # stats
         self.health = PLAYER["Health"]
@@ -381,6 +383,12 @@ class Ranger(Player):
         self.attack_speed = PLAYER["Weapon"]["Speed"]
         self.attack_arc = PLAYER["Weapon"]["Arc"]
         self.damage = PLAYER["Weapon"]["Damage"]
+
+        # Charging attack
+        self.charging = False
+        self.charge_start = pg.time.get_ticks()
+        self.charge_last = pg.time.get_ticks()
+        self.charge_time = 1000
 
     def attack(self, ability="Default"):
         # Find mobs in range
@@ -395,27 +403,43 @@ class Ranger(Player):
             self.last_attack = now
             logging.debug("player attacks")
             # spend mana cost of ability
-            self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
             # Character Attack Pose
             if self.facing == "R":
                 self.image = self.attack_right[self.update_frame()]
             else:
                 self.image = self.attack_left[self.update_frame()]
 
-            # # Spawn Weapon Animation
-            # logging.debug("spawning weapon animation")
-            # if ability == "Fire Attack":
-            #     logging.debug("Fire Weapon Animation")
-            #     WeaponAnimation(self.attack_speed, self.direction, "fire sword", self.game, self)
-            # elif ability == "Default":
-            #     logging.debug("Normal Weapon Animation")
-            #     WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
-            # else:
-            #     logging.warning(f"An inproper player ability was called: {ability}")
-            #     WeaponAnimation(self.attack_speed, self.direction, "sword", self.game, self)
+            # Calculate default damage
+            if ability == "Default":
+                damage = int(self.damage * self.damage_modifier * ability_modifier)
+                logging.debug("Spawning Arrow sprite")
+                _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+                self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                Arrow(self.game, self.rect.center, _dir, damage)
 
-            # Spawn arrow
-            logging.debug("Spawning Arrow sprite")
-            damage = int(self.damage * self.damage_modifier * ability_modifier)
-            _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
-            Arrow(self.game, self.rect.center, _dir, damage)
+        # handle_charged shot
+        if ability == "Charged Shot":
+            if not self.charging:
+                self.charging = True
+                self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                self.charge_start = pg.time.get_ticks()
+                self.charge_last = pg.time.get_ticks()
+            else:
+                now = pg.time.get_ticks()
+                # check if the mouse button has been lifted up
+                if now - self.charge_last > 25:
+                    # print(now - self.charge_last)
+                    # print("timed out")
+                    self.charging = False
+                # check if the charge time has been completed
+                elif now - self.charge_start >= self.charge_time:
+                    damage = int(self.damage * self.damage_modifier * ability_modifier)
+                    self.charging = False
+                    logging.debug("Spawning Arrow sprite")
+                    _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+                    Arrow(self.game, self.rect.center, _dir, damage)
+                    # print("Shooting")
+                # if the mouse button is still pressed and the time is not up
+                else:
+                    self.charge_last = now
+                    # print("Charging up")

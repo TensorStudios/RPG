@@ -207,7 +207,7 @@ class Game:
         hits = pg.sprite.groupcollide(self.mobs, self.projectiles, False, True)
         for mob in hits:
             for projectile in hits[mob]:
-                mob.health -= projectile.damage
+                mob.take_damage(projectile.damage)
             mob.vel = vec(0, 0)
 
     # Debug function to draw grid to screen

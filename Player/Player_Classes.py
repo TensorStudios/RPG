@@ -426,9 +426,6 @@ class Ranger(Player):
         if ability == "Charged Shot":
             if not self.charging:
                 self.charging = True
-                self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
-                if self.mana < 0:
-                    self.mana = 0
                 self.charge_start = pg.time.get_ticks()
                 self.charge_last = pg.time.get_ticks()
             else:
@@ -440,6 +437,9 @@ class Ranger(Player):
                     self.charging = False
                 # check if the charge time has been completed
                 elif now - self.charge_start >= self.charge_time:
+                    self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                    if self.mana < 0:
+                        self.mana = 0
                     damage = int(self.damage * self.damage_modifier * ability_modifier)
                     self.charging = False
                     logging.debug("Spawning Arrow sprite")

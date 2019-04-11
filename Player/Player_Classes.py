@@ -29,6 +29,7 @@ class Player(pg.sprite.Sprite):
         self.attack_right = []
         self.attack_left = []
         self.right_click_ability = "Replace Me"
+        self.charging = False
 
         self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
         self.hit_rect = PLAYER["Hit Rect"]
@@ -92,6 +93,8 @@ class Player(pg.sprite.Sprite):
             movey = True
         if movex and movey:
             self.vel *= 0.7071
+        if self.charging:
+            self.vel /= 2
 
         # Attack keys
 
@@ -101,6 +104,8 @@ class Player(pg.sprite.Sprite):
                 self.attack()
             if click == (0, 0, 1):
                 self.attack(ability=self.right_click_ability)
+            if click == (0, 0, 0):
+                self.charging = False
 
     def get_direction(self):
         # find what direction the player is facing
@@ -422,6 +427,8 @@ class Ranger(Player):
             if not self.charging:
                 self.charging = True
                 self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                if self.mana < 0:
+                    self.mana = 0
                 self.charge_start = pg.time.get_ticks()
                 self.charge_last = pg.time.get_ticks()
             else:

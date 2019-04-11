@@ -11,12 +11,16 @@ PLAYER = {
     "Weapon": Weapons.WEAPONS["Sword"],
     "Abilities": {
         "Fire Attack": {
-            "Damage Modifier": 2,
+            "Damage Modifier": 1.5,
             "Mana Cost": 20
         },
         "Default": {
             "Damage Modifier": 1,
             "Mana Cost": 0
+        },
+        "Charged Shot": {
+            "Damage Modifier": 1.5,
+            "Mana Cost": 5
         }
     },
     "Level Up": {

@@ -16,6 +16,7 @@ import pygame as pg
 import sys
 from Settings import *
 from Sprites import *
+from Player.Player_Classes import Player, Knight, Ranger
 from os import path, chdir, getcwd
 from tilemap import *
 from NPC.NPC import QuestNPC
@@ -64,6 +65,11 @@ class Game:
         self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
         logging.debug("success")
 
+        # arrow image
+        logging.debug("loading arrow imag")
+        self.arrow_img = pg.image.load(resource_path(img_folder + "Arrow.png")).convert_alpha()
+        logging.debug("success")
+
         # Load Spritesheet image for animations
         logging.debug("loading spritesheet imgs")
         self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
@@ -72,6 +78,8 @@ class Game:
         self.spritesheet_k_a_l = Spritesheet(resource_path(img_folder + "Knight Attack Pose Left.png"))
         self.spritesheet_aa_s = Spritesheet(resource_path(img_folder + "Attack Animation.png"))
         self.spritesheet_fire_attack = Spritesheet(resource_path(img_folder + "Fire Attack.png"))
+        self.spritesheet_r_r = Spritesheet(resource_path(img_folder + "Knight Bow.png"))
+        self.spritesheet_r_l = Spritesheet(resource_path(img_folder + "Knight Bow Left.png"))
         self.spritesheet_z_r = Spritesheet(resource_path(img_folder + "Zombie.png"))
         self.spritesheet_z_l = Spritesheet(resource_path(img_folder + "Zombie Left.png"))
         self.weapon_animations = {
@@ -102,6 +110,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.npcs = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        self.projectiles = pg.sprite.Group()
         self.spawn_zones = []
         logging.info("Loading map")
         self.map = TiledMap(resource_path(self.map_folder + "Map1.tmx"))
@@ -124,7 +133,8 @@ class Game:
         for tile_object in self.map.tmxdata.objects:
             object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
             if tile_object.name == "Player":
-                self.player = Player(self, object_center.x, object_center.y)
+                # self.player = Knight(self, object_center.x, object_center.y)
+                self.player = Ranger(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
             elif tile_object.name == "Mob":
                 Mob(self, object_center.x, object_center.y)
@@ -192,6 +202,13 @@ class Game:
         for hit in hits:
             self.player.add_item(hit.type)
             hit.kill()
+
+        # Arrow hits mob
+        hits = pg.sprite.groupcollide(self.mobs, self.projectiles, False, True)
+        for mob in hits:
+            for projectile in hits[mob]:
+                mob.take_damage(projectile.damage)
+            mob.vel = vec(0, 0)
 
     # Debug function to draw grid to screen
     def draw_grid(self):

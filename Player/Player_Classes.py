@@ -30,6 +30,11 @@ class Player(pg.sprite.Sprite):
         self.attack_left = []
         self.right_click_ability = "Replace Me"
         self.charging = False
+        self.health = 0
+        self.mana = 0
+        self.rot_speed = 0
+        self.mana_recharge_timer = 0
+        self.rect = 0
 
         self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
         self.hit_rect = PLAYER["Hit Rect"]
@@ -46,11 +51,25 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
+        self.equipped = [WEAPONS[weapon]]
 
         # Level Up
         self.level = 1
         self.exp = 0
-        self.damage_modifier = 1
+
+        # Stats
+        self.base_strength = 10
+        self.base_dexterity = 10
+        self.base_intellect = 10
+        self.base_haste = 0
+        self.base_mastery = 0
+
+        # Applied Stats
+        self.strength = self.base_strength
+        self.dexterity = self.base_dexterity
+        self.intellect = self.base_intellect
+        self.haste = self.base_haste
+        self.mastery = self.base_mastery
 
         logging.info("Player Character Created")
 
@@ -138,12 +157,13 @@ class Player(pg.sprite.Sprite):
             while self.exp >= get_exp_requirement(self.level):
                 self.exp -= get_exp_requirement(self.level)
                 self.level += 1
-                self.damage_modifier *= PLAYER["Level Up"]["Dmg Increase"]
                 PLAYER["Health"] += PLAYER["Level Up"]["Health Increase"]
                 self.health = PLAYER["Health"]
+                self.apply_stats_from_levelup(PLAYER["Level Up"]["STR Increase"],
+                                              PLAYER["Level Up"]["DEX Increase"],
+                                              PLAYER["Level Up"]["INT Increase"],)
                 logging.info(f"Player has leveled up to {self.level}")
                 logging.info(f"Player health has increased to {PLAYER['Health']}")
-                logging.info(f"Player Damage modifier has increased to {self.damage_modifier}")
 
     def recharge_mana(self):
         now = pg.time.get_ticks()
@@ -153,9 +173,36 @@ class Player(pg.sprite.Sprite):
             if self.mana >= PLAYER["Mana"]:
                 self.mana = PLAYER["Mana"]
 
+    def calculate_haste(self, base_speed):
+        haste_increase = (1000 / base_speed) * (1 + (self.haste / 1000))
+        return 1000 / haste_increase
+
+    def apply_stats_from_gear(self):
+        self.strength = self.base_strength
+        self.dexterity = self.base_dexterity
+        self.intellect = self.base_intellect
+        self.haste = self.base_haste
+        self.mastery = self.base_mastery
+
+        for item in self.equipped:
+            self.strength += item["STR"]
+            self.dexterity += item["DEX"]
+            self.intellect += item["INT"]
+            self.haste += item["HASTE"]
+            self.mastery += item["MASTERY"]
+
+    def apply_stats_from_levelup(self, strength=0, dexterity=0, intellect=0, haste=0, mastery=0):
+        self.base_strength += strength
+        self.base_dexterity += dexterity
+        self.base_intellect += intellect
+        self.haste += haste
+        self.mastery += mastery
+
     def update(self):
         # Recharge Mana
         self.recharge_mana()
+
+        self.apply_stats_from_gear()
 
         self.get_keys()
         self.direction = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
@@ -257,7 +304,6 @@ class Knight(Player):
         self.mana_recharge_timer = pg.time.get_ticks()
         self.attack_radius = PLAYER["Weapon"]["Range"]
         self.attack_speed = PLAYER["Weapon"]["Speed"]
-        self.attack_arc = PLAYER["Weapon"]["Arc"]
         self.damage = PLAYER["Weapon"]["Damage"]
 
     def attack(self, ability="Default"):
@@ -271,7 +317,7 @@ class Knight(Player):
         cost = PLAYER["Abilities"][ability]["Mana Cost"] < self.mana
         # Check if it has been long enough
         now = pg.time.get_ticks()
-        if now - self.attack_speed > self.last_attack and cost is True:
+        if now - self.calculate_haste(self.attack_speed) > self.last_attack and cost is True:
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
@@ -300,9 +346,9 @@ class Knight(Player):
             for mob in mobs_in_range:
                 if mob.targeted:
                     logging.debug("hit connects")
-                    damage = int(self.damage * self.damage_modifier * ability_modifier)
+                    damage = int(self.damage * self.strength / 10 * ability_modifier)
                     logging.info(f"hit connects for {damage} damage")
-                    mob.health -= damage
+                    mob.take_damage(damage)
 
             # # Hit all mobs in range
             # for mob in mobs_in_range:
@@ -384,9 +430,7 @@ class Ranger(Player):
         self.mana = PLAYER["Mana"]
         self.mana_recharge = PLAYER["Mana Recharge"]
         self.mana_recharge_timer = pg.time.get_ticks()
-        self.attack_radius = PLAYER["Weapon"]["Range"]
         self.attack_speed = PLAYER["Weapon"]["Speed"]
-        self.attack_arc = PLAYER["Weapon"]["Arc"]
         self.damage = PLAYER["Weapon"]["Damage"]
 
         # Charging attack
@@ -402,7 +446,7 @@ class Ranger(Player):
         cost = PLAYER["Abilities"][ability]["Mana Cost"] < self.mana
         # Check if it has been long enough
         now = pg.time.get_ticks()
-        if now - self.attack_speed > self.last_attack and cost is True:
+        if now - self.calculate_haste(self.attack_speed) > self.last_attack and cost is True:
             # Toggle animation flag
             self.attacking = True
             self.last_attack = now
@@ -416,7 +460,7 @@ class Ranger(Player):
 
             # Calculate default damage
             if ability == "Default":
-                damage = int(self.damage * self.damage_modifier * ability_modifier)
+                damage = int(self.damage * self.dexterity / 10 * ability_modifier)
                 logging.debug("Spawning Arrow sprite")
                 _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
                 self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
@@ -436,11 +480,11 @@ class Ranger(Player):
                     # print("timed out")
                     self.charging = False
                 # check if the charge time has been completed
-                elif now - self.charge_start >= self.charge_time:
+                elif now - self.charge_start >= self.calculate_haste(self.charge_time):
                     self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
                     if self.mana < 0:
                         self.mana = 0
-                    damage = int(self.damage * self.damage_modifier * ability_modifier)
+                    damage = int(self.damage * self.dexterity / 5 * ability_modifier)
                     self.charging = False
                     logging.debug("Spawning Arrow sprite")
                     _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360

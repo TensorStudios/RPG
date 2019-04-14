@@ -94,6 +94,9 @@ class Mob(pg.sprite.Sprite):
         self.floating_dmg_amount = None
         self.floating_dmg_font = pg.font.Font(resource_path(getcwd() + "/img/coolvetica rg.ttf"), 35)
         logging.info(f"Created Mob {self.spawn_number}")
+        self.dying = False
+        self.death_timer = 100
+        self.death_timer_start = pg.time.get_ticks()
 
     def __str__(self):
         return f"Mob {self.spawn_number}"
@@ -151,15 +154,34 @@ class Mob(pg.sprite.Sprite):
         self.floating_dmg_amount = damage
         self.damage_show_current = pg.time.get_ticks()
 
+    def display_floating_damage(self):
+        # Display floating damage text
+        if self.floating_dmg_amount is not None:
+            now = pg.time.get_ticks()
+            # print(now - self.damage_show_current < self.damage_show_time)
+            if now - self.damage_show_current < self.damage_show_time:
+                floating_dmg_surface = self.floating_dmg_font.render(str(self.floating_dmg_amount), True, WHITE)
+                floating_dmg_rect = floating_dmg_surface.get_rect()
+                floating_dmg_rect.midtop = (self.rect.width / 2, 0)
+                self.image.blit(floating_dmg_surface, floating_dmg_rect)
+            else:
+                self.floating_dmg_amount = None
+
     def update(self):
         logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
-            logging.info(f"Mob {self.spawn_number} has died")
-            self.grant_exp()
-            self.update_quest()
-            if random.random() >= DROP_RATE:
-                Item(self.game, self.pos, "Health")
-            self.kill()
+            if self.dying:
+                if pg.time.get_ticks() - self.death_timer_start > self.death_timer:
+                    logging.info(f"Mob {self.spawn_number} has died")
+                    self.grant_exp()
+                    self.update_quest()
+                    if random.random() >= DROP_RATE:
+                        Item(self.game, self.pos, "Health")
+                    self.kill()
+            else:
+                self.dying = True
+                self.death_timer_start = pg.time.get_ticks()
+                self.display_floating_damage()
         else:
             target_dist = self.target.pos - self.pos
             if target_dist.length_squared() < DETECT_RADIUS**2:
@@ -183,17 +205,7 @@ class Mob(pg.sprite.Sprite):
                 self.image.convert_alpha()
             self.highlight_on_mouseover()
             self.draw_health()
-            # Display floating damage text
-            if self.floating_dmg_amount is not None:
-                now = pg.time.get_ticks()
-                # print(now - self.damage_show_current < self.damage_show_time)
-                if now - self.damage_show_current < self.damage_show_time:
-                    floating_dmg_surface = self.floating_dmg_font.render(str(self.floating_dmg_amount), True, WHITE)
-                    floating_dmg_rect = floating_dmg_surface.get_rect()
-                    floating_dmg_rect.midtop = (self.rect.width / 2, 0)
-                    self.image.blit(floating_dmg_surface, floating_dmg_rect)
-                else:
-                    self.floating_dmg_amount = None
+            self.display_floating_damage()
 
             collide_with_walls(self, self.game.walls, 'x')
             self.hit_rect.centery = self.pos.y

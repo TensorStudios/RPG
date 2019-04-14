@@ -25,7 +25,9 @@ PLAYER = {
     },
     "Level Up": {
         "Exp Required": 5,
-        "Dmg Increase": 1.1, # Percentage increase
+        "STR Increase": 1,
+        "DEX Increase": 1,
+        "INT Increase": 1,
         "Health Increase": 5
     }
 }

@@ -151,6 +151,14 @@ class Player(pg.sprite.Sprite):
                 self.health += 25
                 if self.health > PLAYER["Health"]:
                     self.health = PLAYER["Health"]
+            # This needs to be refactored to be more dynamic
+            elif used_item == "Armor_2":
+                # add former item to inventory
+                self.add_item(PLAYER["Chest"]["Name"])
+                # print(PLAYER["Chest"]["Name"])
+
+                # equip Item
+                PLAYER["Chest"] = ARMOR["Armor_2"]
 
     def collect_exp(self, exp):
         self.exp += exp

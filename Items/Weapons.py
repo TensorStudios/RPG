@@ -1,5 +1,6 @@
 WEAPONS = {
     "Sword": {
+        "Name": "Sword",
         "Range": 200,
         "Speed": 500,
         "Damage": 10,
@@ -11,6 +12,7 @@ WEAPONS = {
         "MASTERY": 50,
     },
     "Sword_rare": {
+        "Name": "Sword_rare",
         "Range": 200,
         "Speed": 500,
         "Damage": 20,
@@ -22,6 +24,7 @@ WEAPONS = {
         "MASTERY": 100,
     },
     "Bow": {
+        "Name": "Bow",
         "Speed": 500,
         "Damage": 10,
         "STR": 0,
@@ -31,6 +34,7 @@ WEAPONS = {
         "MASTERY": 0,
     },
     "Bow_rare": {
+        "Name": "Bow_rare",
         "Speed": 500,
         "Damage": 20,
         "STR": 0,

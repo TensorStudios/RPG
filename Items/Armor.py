@@ -1,5 +1,6 @@
 ARMOR = {
     "Armor_1": {
+        "Name": "Armor_1",
         "Class": "Heavy",
         "Color": "Blue",
         "DEX": 50,
@@ -9,6 +10,7 @@ ARMOR = {
         "MASTERY": 50,
     },
     "Armor_2": {
+        "Name": "Armor_2",
         "Class": "Heavy",
         "Color": "Red",
         "DEX": 100,
@@ -18,6 +20,7 @@ ARMOR = {
         "MASTERY": 100,
     },
     "Light_1": {
+        "Name": "Light_1",
         "Class": "Heavy",
         "Color": "Blue",
         "DEX": 50,
@@ -27,6 +30,7 @@ ARMOR = {
         "MASTERY": 50,
     },
     "Light_2": {
+        "Name": "Light_2",
         "Class": "Heavy",
         "Color": "Red",
         "DEX": 100,
@@ -36,6 +40,7 @@ ARMOR = {
         "MASTERY": 100,
     },
     "Hat_1": {
+        "Name": "Hat_1",
         "Class": "Heavy",
         "Color": "Red",
         "DEX": 10,
@@ -45,6 +50,7 @@ ARMOR = {
         "MASTERY": 10,
     },
     "Hat_2": {
+        "Name": "Hat_2",
         "Class": "Heavy",
         "Color": "Red",
         "DEX": 20,

@@ -66,7 +66,13 @@ WEAPON_RECT = pg.Rect(0, 0, 80, 80)
 # Inventory
 CLICK_DELAY = 500
 INVENTORY_TYPES = [
-    "Health"
+    "Health",
+    "Armor_1",
+    "Armor_2",
+    "Light_1",
+    "Light_2",
+    "Hat_1",
+    "Hat_2",
 ]
 
 # Items

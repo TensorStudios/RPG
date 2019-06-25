@@ -68,7 +68,7 @@ class Game:
         # placeholder image
         logging.debug("loading placeholder img")
         self.placeholder_img = pg.image.load(resource_path(img_folder + "Placeholder.png")).convert()
-        self.placeholder_img = pg.transform.scale(self.healthpack_img, (20, 20))
+        self.placeholder_img = pg.transform.scale(self.placeholder_img, (20, 20))
         logging.debug("success")
 
         # arrow image

@@ -175,8 +175,10 @@ class Mob(pg.sprite.Sprite):
                     logging.info(f"Mob {self.spawn_number} has died")
                     self.grant_exp()
                     self.update_quest()
+                    # Drop a random item
                     if random.random() >= DROP_RATE:
-                        Item(self.game, self.pos, "Health")
+                        drops = ["Health", "Armor_2"]
+                        Item(self.game, self.pos, random.choice(drops))
                     self.kill()
             else:
                 self.dying = True
@@ -293,7 +295,11 @@ class Item(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.items
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = game.placeholder_img
+        print(_type)
+        if _type == "Health":
+            self.image = game.healthpack_img
+        else:
+            self.image = game.placeholder_img
         self.rect = self.image.get_rect()
         self.hit_rect = self.rect
         self.type = _type

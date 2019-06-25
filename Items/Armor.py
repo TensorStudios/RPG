@@ -1,3 +1,5 @@
+# First three letters are the type for identifying later
+
 ARMOR = {
     "Armor_1": {
         "Name": "Armor_1",
@@ -39,6 +41,8 @@ ARMOR = {
         "HASTE": 100,
         "MASTERY": 100,
     },
+}
+HATS = {
     "Hat_1": {
         "Name": "Hat_1",
         "Class": "Heavy",

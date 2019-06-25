@@ -11,7 +11,7 @@ PLAYER = {
     "Damage Mitigation Time": 100,
     "Weapon": Weapons.WEAPONS["Sword"],
     "Chest": Armor.ARMOR["Armor_1"],
-    "Hat": Armor.ARMOR["Hat_1"],
+    "Hat": Armor.HATS["Hat_1"],
     "Abilities": {
         "Fire Attack": {
             "Damage Modifier": 1.5,

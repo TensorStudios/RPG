@@ -295,7 +295,7 @@ class Item(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.items
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        print(_type)
+        print("Item dropped:", _type)
         if _type == "Health":
             self.image = game.healthpack_img
         else:

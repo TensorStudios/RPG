@@ -8,7 +8,7 @@ from Player.PlayerData import PLAYER, get_exp_requirement
 from Player.Weapon_Animations import WeaponAnimation, Arrow
 from Sprites import collide_with_walls
 from Items.Weapons import WEAPONS
-from Items.Armor import ARMOR
+from Items.Armor import ARMOR, HATS
 
 vec = pg.math.Vector2
 
@@ -23,7 +23,7 @@ class Player(pg.sprite.Sprite):
         self.frame = 0
         PLAYER["Weapon"] = WEAPONS[weapon]
         PLAYER["Chest"] = ARMOR[chest]
-        PLAYER["Hat"] = ARMOR[hat]
+        PLAYER["Hat"] = HATS[hat]
 
         # These variables need to be overwritten in the sub class of the mob
         self.images = {}
@@ -50,11 +50,13 @@ class Player(pg.sprite.Sprite):
         self.inventory = [
             "Health",
             "Health",
-            "Health"
+            "Health",
+            "Armor_2",
+            "Hat_2",
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
-        self.equipped = [WEAPONS[weapon], ARMOR[chest], ARMOR[hat]]
+        self.equipped = [WEAPONS[weapon], ARMOR[chest], HATS[hat]]
 
         # Level Up
         self.level = 1
@@ -151,14 +153,25 @@ class Player(pg.sprite.Sprite):
                 self.health += 25
                 if self.health > PLAYER["Health"]:
                     self.health = PLAYER["Health"]
-            # This needs to be refactored to be more dynamic
-            elif used_item == "Armor_2":
+            elif used_item in ARMOR:
                 # add former item to inventory
                 self.add_item(PLAYER["Chest"]["Name"])
-                # print(PLAYER["Chest"]["Name"])
 
                 # equip Item
-                PLAYER["Chest"] = ARMOR["Armor_2"]
+                PLAYER["Chest"] = ARMOR[used_item]
+            elif used_item in HATS:
+                # add former item to inventory
+                self.add_item(PLAYER["Hat"]["Name"])
+
+                # equip Item
+                PLAYER["Hat"] = HATS[used_item]
+            else:
+                print("Something went wrong")
+            print("Item used:", used_item)
+
+            # For Debugging only uncomment to see stats as gear changes
+            self.apply_stats_from_gear()
+            print(f"Stats: STR: {self.strength}, DEX: {self.dexterity}, HASTE: {self.haste}")
 
     def collect_exp(self, exp):
         self.exp += exp
@@ -189,6 +202,7 @@ class Player(pg.sprite.Sprite):
         return 1000 / haste_increase
 
     def apply_stats_from_gear(self):
+        self.equipped = [PLAYER["Weapon"], PLAYER["Chest"], PLAYER["Hat"]]
         self.strength = self.base_strength
         self.dexterity = self.base_dexterity
         self.intellect = self.base_intellect

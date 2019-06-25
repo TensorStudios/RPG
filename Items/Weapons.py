@@ -1,6 +1,8 @@
+# First three letters are the type for identifying later
+
 WEAPONS = {
     "Sword": {
-        "Name": "Sword",
+        "Name": "Swd_Sword",
         "Range": 200,
         "Speed": 500,
         "Damage": 10,
@@ -12,7 +14,7 @@ WEAPONS = {
         "MASTERY": 50,
     },
     "Sword_rare": {
-        "Name": "Sword_rare",
+        "Name": "Swd_Sword_rare",
         "Range": 200,
         "Speed": 500,
         "Damage": 20,
@@ -24,7 +26,7 @@ WEAPONS = {
         "MASTERY": 100,
     },
     "Bow": {
-        "Name": "Bow",
+        "Name": "Bow_Bow",
         "Speed": 500,
         "Damage": 10,
         "STR": 0,
@@ -34,7 +36,7 @@ WEAPONS = {
         "MASTERY": 0,
     },
     "Bow_rare": {
-        "Name": "Bow_rare",
+        "Name": "Bow_Bow_rare",
         "Speed": 500,
         "Damage": 20,
         "STR": 0,

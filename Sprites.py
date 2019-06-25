@@ -293,7 +293,7 @@ class Item(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.items
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = game.healthpack_img
+        self.image = game.placeholder_img
         self.rect = self.image.get_rect()
         self.hit_rect = self.rect
         self.type = _type

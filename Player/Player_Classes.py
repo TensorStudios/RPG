@@ -8,12 +8,13 @@ from Player.PlayerData import PLAYER, get_exp_requirement
 from Player.Weapon_Animations import WeaponAnimation, Arrow
 from Sprites import collide_with_walls
 from Items.Weapons import WEAPONS
+from Items.Armor import ARMOR
 
 vec = pg.math.Vector2
 
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y, weapon="Sword"):
+    def __init__(self, game, x, y, weapon="Sword", chest="Armor_1", hat="Hat_1"):
         self._layer = PLAYER_LAYER
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -21,6 +22,8 @@ class Player(pg.sprite.Sprite):
         self.walk_cycle = cycle(range(4))
         self.frame = 0
         PLAYER["Weapon"] = WEAPONS[weapon]
+        PLAYER["Chest"] = ARMOR[chest]
+        PLAYER["Hat"] = ARMOR[hat]
 
         # These variables need to be overwritten in the sub class of the mob
         self.images = {}
@@ -51,7 +54,7 @@ class Player(pg.sprite.Sprite):
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
-        self.equipped = [WEAPONS[weapon]]
+        self.equipped = [WEAPONS[weapon], ARMOR[chest], ARMOR[hat]]
 
         # Level Up
         self.level = 1

@@ -1,5 +1,6 @@
 import pygame as pg
 from Items import Weapons
+from Items import Armor
 
 PLAYER = {
     "Speed": 600,
@@ -9,6 +10,8 @@ PLAYER = {
     "Mana Recharge": 200,
     "Damage Mitigation Time": 100,
     "Weapon": Weapons.WEAPONS["Sword"],
+    "Chest": Armor.ARMOR["Armor_1"],
+    "Hat": Armor.ARMOR["Hat_1"],
     "Abilities": {
         "Fire Attack": {
             "Damage Modifier": 1.5,

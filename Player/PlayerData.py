@@ -9,6 +9,7 @@ PLAYER = {
     "Mana": 50,
     "Mana Recharge": 200,
     "Damage Mitigation Time": 100,
+    "Mitigation From Armor": 0.001, # mulitply this by the armor value
     "Weapon": Weapons.WEAPONS["Sword"],
     "Chest": Armor.ARMOR["Armor_1"],
     "Hat": Armor.HATS["Hat_1"],

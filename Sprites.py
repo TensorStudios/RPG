@@ -168,7 +168,7 @@ class Mob(pg.sprite.Sprite):
                 self.floating_dmg_amount = None
 
     def update(self):
-        logging.debug(f"updating mob {self.spawn_number}")
+        # logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
             if self.dying:
                 if pg.time.get_ticks() - self.death_timer_start > self.death_timer:

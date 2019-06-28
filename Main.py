@@ -181,7 +181,6 @@ class Game:
 
     def update(self):
         # update portion of the game loop
-        logging.debug("Calculating Update Loop")
 
         # Get the direction of the mouse relative to the character
         self.mouse_dir = vec(self.camera.mouse_adjustment(pg.mouse.get_pos())) - vec(self.player.pos)
@@ -226,7 +225,7 @@ class Game:
     # Trigger inventory screen
     def open_inventory(self):
         if self.show_inventory:
-            logging.debug("Inventory Open")
+            # logging.debug("Inventory Open")
             self.draw_player_inventory(self.screen, 750, 150, self.player.inventory)
 
     # Draw inventory on screen
@@ -256,7 +255,7 @@ class Game:
     # Trigger dialog
     def open_dialog(self):
         if self.dialog:
-            logging.debug("Open Dialog")
+            # logging.debug("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
 
     # Draw dialog
@@ -378,7 +377,7 @@ class Game:
         logging.info("Resuming Game")
 
     def draw(self):
-        logging.debug("Drawing to screen")
+        # logging.debug("Drawing to screen")
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
@@ -438,6 +437,11 @@ class Game:
                     # Close dialog if it is open
                     self.dialog = False
                     logging.debug("t pressed")
+                if event.key == pg.K_F1:
+                    # add all items to inventory
+                    for item in INVENTORY_TYPES:
+                        self.player.add_item(item)
+                    logging.debug("F1 pressed")
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)

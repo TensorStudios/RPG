@@ -73,6 +73,10 @@ INVENTORY_TYPES = [
     "Light_2",
     "Hat_1",
     "Hat_2",
+    "Sword",
+    "Sword_rare",
+    "Bow",
+    "Bow_rare"
 ]
 
 # Items

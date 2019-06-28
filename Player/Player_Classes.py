@@ -51,12 +51,11 @@ class Player(pg.sprite.Sprite):
             "Health",
             "Health",
             "Health",
-            "Armor_2",
-            "Hat_2",
         ]
         self.inventory_click_delay = pg.time.get_ticks()
         self.damage_time = pg.time.get_ticks()
         self.equipped = [WEAPONS[weapon], ARMOR[chest], HATS[hat]]
+        self.trained_weapons = ["Bow", "Sword"]
 
         # Level Up
         self.level = 1
@@ -68,6 +67,7 @@ class Player(pg.sprite.Sprite):
         self.base_intellect = 10
         self.base_haste = 0
         self.base_mastery = 0
+        self.base_armor_value = 0
 
         # Applied Stats
         self.strength = self.base_strength
@@ -75,6 +75,7 @@ class Player(pg.sprite.Sprite):
         self.intellect = self.base_intellect
         self.haste = self.base_haste
         self.mastery = self.base_mastery
+        self.armor_value = self.base_armor_value
 
         logging.info("Player Character Created")
 
@@ -92,10 +93,15 @@ class Player(pg.sprite.Sprite):
 
     def take_damage(self, damage):
         now = pg.time.get_ticks()
+        # calculate damage reduction from armor. each point of armor = 0.1% damage reduction
+        mitigation_factor = 1 - (self.armor_value * PLAYER["Mitigation From Armor"])
+        # If there is more than 100% damage reduction, set the reduction to 100%
+        if mitigation_factor < 0:
+            mitigation_factor = 0
         if now - self.damage_time >= PLAYER["Damage Mitigation Time"]:
-            logging.info(f"Player takes {damage} damage")
+            logging.info(f"Player takes {int(damage * mitigation_factor)} damage")
             self.damage_time = now
-            self.health -= damage
+            self.health -= int(damage * mitigation_factor)
 
     def get_keys(self):
         self.rot_speed = 0
@@ -142,7 +148,8 @@ class Player(pg.sprite.Sprite):
             self.inventory.append(item)
             logging.info(f"{item} added to inventory")
         else:
-            print("Error, item doesn't exist")
+            logging.info(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
+            print(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
 
     def use_item(self, item):
         now = pg.time.get_ticks()
@@ -165,6 +172,18 @@ class Player(pg.sprite.Sprite):
 
                 # equip Item
                 PLAYER["Hat"] = HATS[used_item]
+            elif used_item in WEAPONS:
+                if WEAPONS[used_item]["Type"] in self.trained_weapons:
+                    # add former item to inventory
+                    self.add_item(PLAYER["Weapon"]["Name"])
+
+                    # equip Item
+                    PLAYER["Weapon"] = WEAPONS[used_item]
+                else:
+                    logging.info(f"You cannot equip {WEAPONS[used_item]['Type']}")
+                    print(f"You cannot equip {WEAPONS[used_item]['Type']}")
+                    self.add_item(used_item)
+
             else:
                 print("Something went wrong")
             print("Item used:", used_item)
@@ -172,6 +191,7 @@ class Player(pg.sprite.Sprite):
             # For Debugging only uncomment to see stats as gear changes
             self.apply_stats_from_gear()
             print(f"Stats: STR: {self.strength}, DEX: {self.dexterity}, HASTE: {self.haste}")
+            print(f"Equipped items: {self.equipped[0]['Name'], self.equipped[1]['Name'], self.equipped[2]['Name']}")
 
     def collect_exp(self, exp):
         self.exp += exp
@@ -208,6 +228,7 @@ class Player(pg.sprite.Sprite):
         self.intellect = self.base_intellect
         self.haste = self.base_haste
         self.mastery = self.base_mastery
+        self.armor_value = self.base_armor_value
 
         for item in self.equipped:
             self.strength += item["STR"]
@@ -215,6 +236,7 @@ class Player(pg.sprite.Sprite):
             self.intellect += item["INT"]
             self.haste += item["HASTE"]
             self.mastery += item["MASTERY"]
+            self.armor_value += item["Armor_value"]
 
     def apply_stats_from_levelup(self, strength=0, dexterity=0, intellect=0, haste=0, mastery=0):
         self.base_strength += strength
@@ -228,6 +250,7 @@ class Player(pg.sprite.Sprite):
         self.recharge_mana()
 
         self.apply_stats_from_gear()
+        self.inventory.sort()
 
         self.get_keys()
         self.direction = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
@@ -276,7 +299,7 @@ class Player(pg.sprite.Sprite):
 
 class Knight(Player):
     def __init__(self, game, x, y):
-        Player.__init__(self, game, x, y, "Sword")
+        Player.__init__(self, game, x, y, "Sword", "Armor_1", "Hat_1")
         self.images = {
             "Walk_r_1": self.game.spritesheet_k_r.get_image(0, 0, 100, 100),
             "Walk_r_2": self.game.spritesheet_k_r.get_image(100, 0, 100, 100),
@@ -321,6 +344,7 @@ class Knight(Player):
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
         self.right_click_ability = "Fire Attack"
+        self.trained_weapons = ["Swrod"]
 
         # stats
         self.health = PLAYER["Health"]
@@ -404,7 +428,7 @@ class Knight(Player):
 
 class Ranger(Player):
     def __init__(self, game, x, y):
-        Player.__init__(self, game, x, y, "Bow")
+        Player.__init__(self, game, x, y, "Bow", "Light_1", "Hat_1")
         self.images = {
             "Walk_r_1": self.game.spritesheet_r_r.get_image(0, 0, 100, 100),
             "Walk_r_2": self.game.spritesheet_r_r.get_image(100, 0, 100, 100),
@@ -449,6 +473,7 @@ class Ranger(Player):
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
         self.right_click_ability = "Charged Shot"
+        self.trained_weapons = ["Bow"]
 
         # stats
         self.health = PLAYER["Health"]

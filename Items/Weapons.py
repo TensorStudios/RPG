@@ -54,4 +54,3 @@ WEAPONS = {
         "Armor_value": 0,
     },
 }
-print(type(WEAPONS))

@@ -170,9 +170,8 @@ class Player(pg.sprite.Sprite):
                         if self.health > PLAYER["Health"]:
                             self.health = PLAYER["Health"]
                 else:
-                    if CONSUMABLES[used_item]["Effect Type"] == "Haste":
-                        self.consumable_timeout = pg.time.get_ticks() + CONSUMABLES[used_item]["Effect Duration"]
-                        self.consumable_active = "Haste"
+                    self.consumable_timeout = pg.time.get_ticks() + CONSUMABLES[used_item]["Effect Duration"]
+                    self.consumable_active = used_item
 
             # If item is equipment
             elif used_item in ARMOR:
@@ -275,6 +274,8 @@ class Player(pg.sprite.Sprite):
             if pg.time.get_ticks() <= self.consumable_timeout:
                 if self.consumable_active == "Haste":
                     self.haste += CONSUMABLES["Haste"]["Effect Value"]
+                if self.consumable_active == "Armor":
+                    self.armor_value += CONSUMABLES["Armor"]["Effect Value"]
             # If the duration has expired, reset the active potion
             else:
                 self.consumable_active = None

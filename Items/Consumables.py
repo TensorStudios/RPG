@@ -11,4 +11,10 @@ CONSUMABLES = {
         "Effect Value": 1000,
         "Effect Duration": 5000
     },
+    "Armor": {
+        "Name": "Armor",
+        "Effect Type": "Armor",
+        "Effect Value": 1000,
+        "Effect Duration": 5000
+    },
 }

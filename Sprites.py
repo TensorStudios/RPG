@@ -177,7 +177,7 @@ class Mob(pg.sprite.Sprite):
                     self.update_quest()
                     # Drop a random item
                     if random.random() >= DROP_RATE:
-                        drops = ["Health", "Armor_2"]
+                        drops = INVENTORY_TYPES
                         Item(self.game, self.pos, random.choice(drops))
                     self.kill()
             else:

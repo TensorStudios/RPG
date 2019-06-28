@@ -246,9 +246,11 @@ class Game:
             rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
             if rect.collidepoint(pg.mouse.get_pos()):
                 self.draw_text(item, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
-                # If the item is left clicked, tell the player to use the item
+                # If the item is left clicked, tell the player to use the item, if rmb is pressed, drop item
                 if mouse[0]:
                     self.player.use_item(position)
+                if mouse[2]:
+                    self.player.use_item(position, drop=True)
             else:
                 self.draw_text(item, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 

@@ -1,4 +1,7 @@
 import pygame as pg
+from Items.Armor import ARMOR, HATS
+from Items.Weapons import WEAPONS
+from Items.Consumables import CONSUMABLES
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -65,19 +68,15 @@ WEAPON_RECT = pg.Rect(0, 0, 80, 80)
 
 # Inventory
 CLICK_DELAY = 500
-INVENTORY_TYPES = [
-    "Health",
-    "Armor_1",
-    "Armor_2",
-    "Light_1",
-    "Light_2",
-    "Hat_1",
-    "Hat_2",
-    "Sword",
-    "Sword_rare",
-    "Bow",
-    "Bow_rare"
-]
+INVENTORY_TYPES = []
+for item in CONSUMABLES:
+    INVENTORY_TYPES.append(item)
+for item in ARMOR:
+    INVENTORY_TYPES.append(item)
+for item in WEAPONS:
+    INVENTORY_TYPES.append(item)
+for item in HATS:
+    INVENTORY_TYPES.append(item)
 
 # Items
 ITEM_IMAGES = {'health': 'health_pack.png'}

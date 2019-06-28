@@ -9,6 +9,7 @@ from Player.Weapon_Animations import WeaponAnimation, Arrow
 from Sprites import collide_with_walls
 from Items.Weapons import WEAPONS
 from Items.Armor import ARMOR, HATS
+from Items.Consumables import CONSUMABLES
 
 vec = pg.math.Vector2
 
@@ -56,6 +57,8 @@ class Player(pg.sprite.Sprite):
         self.damage_time = pg.time.get_ticks()
         self.equipped = [WEAPONS[weapon], ARMOR[chest], HATS[hat]]
         self.trained_weapons = ["Bow", "Sword"]
+        self.consumable_timeout = pg.time.get_ticks()
+        self.consumable_active = None
 
         # Level Up
         self.level = 1
@@ -151,15 +154,27 @@ class Player(pg.sprite.Sprite):
             logging.info(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
             print(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
 
-    def use_item(self, item):
+    def use_item(self, item, drop=False):
         now = pg.time.get_ticks()
         if now - self.inventory_click_delay > CLICK_DELAY:
             self.inventory_click_delay = now
             used_item = self.inventory.pop(item)
-            if used_item == "Health":
-                self.health += 25
-                if self.health > PLAYER["Health"]:
-                    self.health = PLAYER["Health"]
+            if drop is True:
+                used_item = None
+
+            # If item is a consumable
+            if used_item in CONSUMABLES:
+                if CONSUMABLES[used_item]["Effect Duration"] is None:
+                    if CONSUMABLES[used_item]["Effect Type"] == "Heal":
+                        self.health += CONSUMABLES[used_item]["Effect Value"]
+                        if self.health > PLAYER["Health"]:
+                            self.health = PLAYER["Health"]
+                else:
+                    if CONSUMABLES[used_item]["Effect Type"] == "Haste":
+                        self.consumable_timeout = pg.time.get_ticks() + CONSUMABLES[used_item]["Effect Duration"]
+                        self.consumable_active = "Haste"
+
+            # If item is equipment
             elif used_item in ARMOR:
                 # add former item to inventory
                 self.add_item(PLAYER["Chest"]["Name"])
@@ -185,7 +200,10 @@ class Player(pg.sprite.Sprite):
                     self.add_item(used_item)
 
             else:
-                print("Something went wrong")
+                if used_item is None:
+                    print("Item was dropped")
+                else:
+                    print("Something went wrong")
             print("Item used:", used_item)
 
             # For Debugging only uncomment to see stats as gear changes
@@ -250,6 +268,18 @@ class Player(pg.sprite.Sprite):
         self.recharge_mana()
 
         self.apply_stats_from_gear()
+
+        # Check for active consumables
+        if self.consumable_active is not None:
+            # Check if the duration has expired
+            if pg.time.get_ticks() <= self.consumable_timeout:
+                if self.consumable_active == "Haste":
+                    self.haste += CONSUMABLES["Haste"]["Effect Value"]
+            # If the duration has expired, reset the active potion
+            else:
+                self.consumable_active = None
+                self.consumable_timeout = None
+
         self.inventory.sort()
 
         self.get_keys()

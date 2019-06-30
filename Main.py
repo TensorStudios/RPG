@@ -9,7 +9,14 @@ Devin Emnett
 
 
 """
+# Attempt to update items from google
+try:
+    from Items import update_items_from_Google
+    print("import from google successful")
+except:
+    print("import from google failed, will used local files")
 
+from Settings import *
 import logging
 import datetime
 import pygame as pg
@@ -26,16 +33,6 @@ from Interface.UI import *
 
 logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
                     format="%(asctime)s:%(levelname)s:%(message)s")
-
-# Attempt to update items from google
-try:
-    from Items import update_items_from_Google
-    print("import from google successful")
-except:
-    print("import from google failed, will used local files")
-
-# Settings import has to be after google update because it reads from the stored CSV files
-from Settings import *
 
 
 class Game:

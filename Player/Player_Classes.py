@@ -129,7 +129,9 @@ class Player(pg.sprite.Sprite):
 
         # Attack keys
 
-        if self.game.dialog is False:
+        if self.game.dialog is True or self.game.show_inventory is True:
+            pass
+        else:
             click = pg.mouse.get_pressed()
             if click == (1, 0, 0):
                 self.attack()
@@ -430,32 +432,6 @@ class Knight(Player):
                     damage = int(self.damage * self.strength / 10 * ability_modifier)
                     logging.info(f"hit connects for {damage} damage")
                     mob.take_damage(damage)
-
-            # # Hit all mobs in range
-            # for mob in mobs_in_range:
-            #     # Check if the mob is within the weapon arc
-            #     # largest degree
-            #     high_angle = (self.direction + self.attack_arc) % 360
-            #     # Smallest degree
-            #     low_angle = (self.direction - self.attack_arc) % 360
-            #     # The angle of the mob to the player
-            #     mob_angle = (self.pos - mob.pos).normalize()
-            #     # Add 180 degrees to make it easy to compare angles
-            #     mob_angle = vec(0, 0).angle_to(mob_angle) + 180
-            #
-            #     # See if the mob angle is within the two angles
-            #     if high_angle >= mob_angle >= low_angle:
-            #         logging.debug("hit connects")
-            #         mob.health -= self.damage
-            #     # account for if the mob is at a high angle and high_angle is at a low value
-            #     elif high_angle < 90:
-            #         if mob_angle >= 315:
-            #             mob_angle -= 360
-            #         low_angle -= 360
-            #         if high_angle >= mob_angle >= low_angle:
-            #             damage = int(self.damage * self.damage_modifier * ability_modifier)
-            #             logging.info(f"hit connects for {damage} damage")
-            #             mob.health -= damage
 
 
 class Ranger(Player):

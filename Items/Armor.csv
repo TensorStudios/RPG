@@ -1,0 +1,6 @@
+Name,Type,Class,Armor_value,Color,DEX,STR,INT,HASTE,MASTERY
+Basic,Armor,Basic,0,Blue,0,0,0,0,0
+Armor_1,Armor,Heavy,50,Blue,0,50,0,50,50
+Armor_2,Armor,Heavy,100,Red,0,100,0,100,100
+Light_1,Armor,Light,50,Blue,50,0,0,50,50
+Light_2,Armor,Light,100,Red,100,0,0,100,100

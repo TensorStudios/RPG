@@ -21,8 +21,13 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
     if x + w > mouse[0] > x and y + h > mouse[1] > y:
         pg.draw.rect(game.screen, ac, (x, y, w, h))
         if click[0] == 1 and action != None:
-            if action == "play":
-                logging.info("Play button pressed")
+            if action == "Knight":
+                logging.info("Knight button pressed")
+                game.player_class = "Knight"
+                game.intro = False
+            if action == "Ranger":
+                logging.info("Ranger button pressed")
+                game.player_class = "Ranger"
                 game.intro = False
             elif action == "quit":
                 logging.info("Quit Button Pressed")

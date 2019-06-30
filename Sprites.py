@@ -3,7 +3,6 @@ import pygame as pg
 from Settings import *
 import random
 from NPC import Quests
-from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER, get_exp_requirement
 from os import path, chdir, getcwd
 import sys
@@ -177,7 +176,7 @@ class Mob(pg.sprite.Sprite):
                     self.update_quest()
                     # Drop a random item
                     if random.random() >= DROP_RATE:
-                        drops = INVENTORY_TYPES
+                        drops = list(filter("Basic".__ne__, INVENTORY_TYPES))
                         Item(self.game, self.pos, random.choice(drops))
                     self.kill()
             else:

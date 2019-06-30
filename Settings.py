@@ -1,6 +1,5 @@
 import pygame as pg
-from Items.Armor import ARMOR, HATS
-from Items.Weapons import WEAPONS
+from Items.Items import ARMOR, HATS, WEAPONS
 from Items.Consumables import CONSUMABLES
 
 # define some colors (R, G, B)
@@ -19,24 +18,12 @@ BLUE = (0, 0, 255)
 WIDTH = 1024   # 16 * 64 or 32 * 32 or 64 * 16
 HEIGHT = 768  # 16 * 48 or 32 * 24 or 64 * 12
 FPS = 60
-TITLE = "Tilemap Demo"
+TITLE = "Tensor Studios RPG"
 BGCOLOR = DARKGREY
 
 TILESIZE = 64
 GRIDWIDTH = WIDTH / TILESIZE
 GRIDHEIGHT = HEIGHT / TILESIZE
-
-# # Player Settings
-# PLAYER_SPEED = 600
-# PLAYER_HIT_RECT = pg.Rect(0, 0, 60, 90)
-# PLAYER_HEALTH = 100
-# PLAYER_DAMAGE_MITIGATION_TIME = 100
-#
-# # Weapon Settings
-# WEAPON_RANGE = 200
-# WEAPON_SPEED = 500
-# WEAPON_DAMAGE = 25
-# WEAPON_ARC = 45
 
 # Mob Settings
 MOB_HIT_RECT = pg.Rect(0, 0, 35, 70)

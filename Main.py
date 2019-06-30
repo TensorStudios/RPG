@@ -14,7 +14,6 @@ import logging
 import datetime
 import pygame as pg
 import sys
-from Settings import *
 from Sprites import *
 from Player.Player_Classes import Player, Knight, Ranger
 from os import path, chdir, getcwd
@@ -27,6 +26,16 @@ from Interface.UI import *
 
 logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
                     format="%(asctime)s:%(levelname)s:%(message)s")
+
+# Attempt to update items from google
+try:
+    from Items import update_items_from_Google
+    print("import from google successful")
+except:
+    print("import from google failed, will used local files")
+
+# Settings import has to be after google update because it reads from the stored CSV files
+from Settings import *
 
 
 class Game:
@@ -41,6 +50,10 @@ class Game:
 
     def load_data(self):
         logging.info("Loading Game")
+
+        # Player class selection - will be overwritten depending on which button is pressed
+        self.player_class = "Ranger"
+
         # Load folder locations
         game_folder = getcwd()
         img_folder = resource_path(game_folder + '/img/')
@@ -139,8 +152,10 @@ class Game:
         for tile_object in self.map.tmxdata.objects:
             object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
             if tile_object.name == "Player":
-                self.player = Knight(self, object_center.x, object_center.y)
-                # self.player = Ranger(self, object_center.x, object_center.y)
+                if self.player_class == "Knight":
+                    self.player = Knight(self, object_center.x, object_center.y)
+                elif self.player_class == "Ranger":
+                    self.player = Ranger(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
             elif tile_object.name == "Mob":
                 Mob(self, object_center.x, object_center.y)
@@ -442,7 +457,8 @@ class Game:
                 if event.key == pg.K_F1:
                     # add all items to inventory
                     for item in INVENTORY_TYPES:
-                        self.player.add_item(item)
+                        if item != "Basic":
+                            self.player.add_item(item)
                     logging.debug("F1 pressed")
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
@@ -484,7 +500,8 @@ class Game:
             TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
             self.screen.blit(TextSurf, TextRect)
 
-            button(self, "NEW GAME", WIDTH / 2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(self, "Knight", WIDTH / 2 - 150, 250, 300, 75, WHITE, LIGHTGREY, "Knight")
+            button(self, "Ranger", WIDTH / 2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "Ranger")
             button(self, "LOAD", WIDTH / 2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
             button(self, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
             button(self, "QUIT", WIDTH / 2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")

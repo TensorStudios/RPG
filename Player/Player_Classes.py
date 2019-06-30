@@ -3,19 +3,17 @@ import pygame as pg
 from itertools import cycle
 from Settings import *
 from NPC import Quests
-from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER, get_exp_requirement
 from Player.Weapon_Animations import WeaponAnimation, Arrow
 from Sprites import collide_with_walls
-from Items.Weapons import WEAPONS
-from Items.Armor import ARMOR, HATS
+from Items.Items import ARMOR, WEAPONS, HATS
 from Items.Consumables import CONSUMABLES
 
 vec = pg.math.Vector2
 
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y, weapon="Sword", chest="Armor_1", hat="Hat_1"):
+    def __init__(self, game, x, y, weapon="Basic", chest="Basic", hat="Basic"):
         self._layer = PLAYER_LAYER
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -147,7 +145,8 @@ class Player(pg.sprite.Sprite):
             logging.debug(f"player facing {self.direction}")
 
     def add_item(self, item):
-        if item in INVENTORY_TYPES:
+        # This method does not add Basic items to inventory
+        if item in INVENTORY_TYPES and item != "Basic":
             self.inventory.append(item)
             logging.info(f"{item} added to inventory")
         else:
@@ -330,7 +329,7 @@ class Player(pg.sprite.Sprite):
 
 class Knight(Player):
     def __init__(self, game, x, y):
-        Player.__init__(self, game, x, y, "Sword", "Armor_1", "Hat_1")
+        Player.__init__(self, game, x, y)
         self.images = {
             "Walk_r_1": self.game.spritesheet_k_r.get_image(0, 0, 100, 100),
             "Walk_r_2": self.game.spritesheet_k_r.get_image(100, 0, 100, 100),
@@ -375,14 +374,16 @@ class Knight(Player):
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
         self.right_click_ability = "Fire Attack"
-        self.trained_weapons = ["Swrod"]
+        self.trained_weapons = ["Sword"]
 
         # stats
         self.health = PLAYER["Health"]
         self.mana = PLAYER["Mana"]
         self.mana_recharge = PLAYER["Mana Recharge"]
         self.mana_recharge_timer = pg.time.get_ticks()
-        self.attack_radius = PLAYER["Weapon"]["Range"]
+        # I am removing this from the weapon stats perhaps this can be determined by type? IE: 2h Sword
+        # self.attack_radius = PLAYER["Weapon"]["Range"]
+        self.attack_radius = 200
         self.attack_speed = PLAYER["Weapon"]["Speed"]
         self.damage = PLAYER["Weapon"]["Damage"]
 
@@ -459,7 +460,7 @@ class Knight(Player):
 
 class Ranger(Player):
     def __init__(self, game, x, y):
-        Player.__init__(self, game, x, y, "Bow", "Light_1", "Hat_1")
+        Player.__init__(self, game, x, y)
         self.images = {
             "Walk_r_1": self.game.spritesheet_r_r.get_image(0, 0, 100, 100),
             "Walk_r_2": self.game.spritesheet_r_r.get_image(100, 0, 100, 100),

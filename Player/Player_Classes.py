@@ -152,8 +152,11 @@ class Player(pg.sprite.Sprite):
             self.inventory.append(item)
             logging.info(f"{item} added to inventory")
         else:
-            logging.info(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
-            print(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
+            if item == "Basic":
+                logging.debug("Basic item unequipped, will not be re-added to player inventory")
+            else:
+                logging.info(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
+                print(f"Error, item doesn't exist: {item} perhaps it needs to be added to INVENTORY_TYPES")
 
     def use_item(self, item, drop=False):
         now = pg.time.get_ticks()

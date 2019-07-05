@@ -5,7 +5,7 @@
 4. Install the google client library by:
     - running the terminal in pycharm (this allows the installation to be on the right Virtual Env)
     - entering the command: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-5. Run update_items_from_google.py
+5. Run Main.py
 6. When the warning screen appears click "Advanced" and then "Go to Quickstart(unsafe)"
 7. Click "Allow"
 8. Close the browser window

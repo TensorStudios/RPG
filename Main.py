@@ -9,12 +9,18 @@ Devin Emnett
 
 
 """
+# Attempt to update items from google
+try:
+    from Items import update_items_from_Google
+    print("import from google successful")
+except:
+    print("import from google failed, will used local files")
 
+from Settings import *
 import logging
 import datetime
 import pygame as pg
 import sys
-from Settings import *
 from Sprites import *
 from Player.Player_Classes import Player, Knight, Ranger
 from os import path, chdir, getcwd
@@ -41,6 +47,10 @@ class Game:
 
     def load_data(self):
         logging.info("Loading Game")
+
+        # Player class selection - will be overwritten depending on which button is pressed
+        self.player_class = "Ranger"
+
         # Load folder locations
         game_folder = getcwd()
         img_folder = resource_path(game_folder + '/img/')
@@ -50,7 +60,7 @@ class Game:
         self.map = None
         self.map_img = None
         logging.debug("loading Fonts")
-        self.gameover_font = resource_path(img_folder + 'Game Over Font.TTF')
+        self.gameover_font = resource_path(img_folder + 'Game Over Font.ttf')
         self.inventory_font = resource_path(img_folder + "coolvetica rg.ttf")
         logging.debug("success")
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
@@ -63,6 +73,12 @@ class Game:
         logging.debug("loading healthpack img")
         self.healthpack_img = pg.image.load(resource_path(img_folder + "health_pack.png")).convert()
         self.healthpack_img = pg.transform.scale(self.healthpack_img, (20, 20))
+        logging.debug("success")
+
+        # placeholder image
+        logging.debug("loading placeholder img")
+        self.placeholder_img = pg.image.load(resource_path(img_folder + "Placeholder.png")).convert()
+        self.placeholder_img = pg.transform.scale(self.placeholder_img, (20, 20))
         logging.debug("success")
 
         # arrow image
@@ -133,8 +149,10 @@ class Game:
         for tile_object in self.map.tmxdata.objects:
             object_center = vec(tile_object.x + tile_object.width / 2, tile_object.y + tile_object.height / 2)
             if tile_object.name == "Player":
-                self.player = Knight(self, object_center.x, object_center.y)
-                # self.player = Ranger(self, object_center.x, object_center.y)
+                if self.player_class == "Knight":
+                    self.player = Knight(self, object_center.x, object_center.y)
+                elif self.player_class == "Ranger":
+                    self.player = Ranger(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
             elif tile_object.name == "Mob":
                 Mob(self, object_center.x, object_center.y)
@@ -175,7 +193,6 @@ class Game:
 
     def update(self):
         # update portion of the game loop
-        logging.debug("Calculating Update Loop")
 
         # Get the direction of the mouse relative to the character
         self.mouse_dir = vec(self.camera.mouse_adjustment(pg.mouse.get_pos())) - vec(self.player.pos)
@@ -220,7 +237,7 @@ class Game:
     # Trigger inventory screen
     def open_inventory(self):
         if self.show_inventory:
-            logging.debug("Inventory Open")
+            # logging.debug("Inventory Open")
             self.draw_player_inventory(self.screen, 750, 150, self.player.inventory)
 
     # Draw inventory on screen
@@ -241,16 +258,18 @@ class Game:
             rect = pg.Rect(x + 5, y + 15 + (position * text_height), box_width, text_height)
             if rect.collidepoint(pg.mouse.get_pos()):
                 self.draw_text(item, self.inventory_font, 20, BLUE, x + 5, y + 15 + (position * text_height), "w")
-                # If the item is left clicked, tell the player to use the item
+                # If the item is left clicked, tell the player to use the item, if rmb is pressed, drop item
                 if mouse[0]:
                     self.player.use_item(position)
+                if mouse[2]:
+                    self.player.use_item(position, drop=True)
             else:
                 self.draw_text(item, self.inventory_font, 20, WHITE, x + 5, y + 15 + (position * text_height), "w")
 
     # Trigger dialog
     def open_dialog(self):
         if self.dialog:
-            logging.debug("Open Dialog")
+            # logging.debug("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
 
     # Draw dialog
@@ -372,7 +391,7 @@ class Game:
         logging.info("Resuming Game")
 
     def draw(self):
-        logging.debug("Drawing to screen")
+        # logging.debug("Drawing to screen")
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
@@ -432,6 +451,12 @@ class Game:
                     # Close dialog if it is open
                     self.dialog = False
                     logging.debug("t pressed")
+                if event.key == pg.K_F1:
+                    # add all items to inventory
+                    for item in INVENTORY_TYPES:
+                        if item != "Basic":
+                            self.player.add_item(item)
+                    logging.debug("F1 pressed")
 
     def draw_text(self, text, font_name, size, color, x, y, align="nw"):
         font = pg.font.Font(font_name, size)
@@ -472,7 +497,8 @@ class Game:
             TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
             self.screen.blit(TextSurf, TextRect)
 
-            button(self, "NEW GAME", WIDTH / 2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "play")
+            button(self, "Knight", WIDTH / 2 - 150, 250, 300, 75, WHITE, LIGHTGREY, "Knight")
+            button(self, "Ranger", WIDTH / 2 - 150, 350, 300, 75, WHITE, LIGHTGREY, "Ranger")
             button(self, "LOAD", WIDTH / 2 - 150, 450, 300, 75, WHITE, LIGHTGREY, "load")
             button(self, "SETTINGS", WIDTH / 2 - 150, 550, 300, 75, WHITE, LIGHTGREY, "settings")
             button(self, "QUIT", WIDTH / 2 - 150, 650, 300, 75, WHITE, LIGHTGREY, "quit")

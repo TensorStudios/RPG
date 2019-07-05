@@ -1,4 +1,6 @@
 import pygame as pg
+from Items.Items import ARMOR, HATS, WEAPONS
+from Items.Consumables import CONSUMABLES
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -16,24 +18,12 @@ BLUE = (0, 0, 255)
 WIDTH = 1024   # 16 * 64 or 32 * 32 or 64 * 16
 HEIGHT = 768  # 16 * 48 or 32 * 24 or 64 * 12
 FPS = 60
-TITLE = "Tilemap Demo"
+TITLE = "Tensor Studios RPG"
 BGCOLOR = DARKGREY
 
 TILESIZE = 64
 GRIDWIDTH = WIDTH / TILESIZE
 GRIDHEIGHT = HEIGHT / TILESIZE
-
-# # Player Settings
-# PLAYER_SPEED = 600
-# PLAYER_HIT_RECT = pg.Rect(0, 0, 60, 90)
-# PLAYER_HEALTH = 100
-# PLAYER_DAMAGE_MITIGATION_TIME = 100
-#
-# # Weapon Settings
-# WEAPON_RANGE = 200
-# WEAPON_SPEED = 500
-# WEAPON_DAMAGE = 25
-# WEAPON_ARC = 45
 
 # Mob Settings
 MOB_HIT_RECT = pg.Rect(0, 0, 35, 70)
@@ -65,9 +55,15 @@ WEAPON_RECT = pg.Rect(0, 0, 80, 80)
 
 # Inventory
 CLICK_DELAY = 500
-INVENTORY_TYPES = [
-    "Health"
-]
+INVENTORY_TYPES = []
+for item in CONSUMABLES:
+    INVENTORY_TYPES.append(item)
+for item in ARMOR:
+    INVENTORY_TYPES.append(item)
+for item in WEAPONS:
+    INVENTORY_TYPES.append(item)
+for item in HATS:
+    INVENTORY_TYPES.append(item)
 
 # Items
 ITEM_IMAGES = {'health': 'health_pack.png'}

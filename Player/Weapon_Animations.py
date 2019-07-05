@@ -16,7 +16,7 @@ class WeaponAnimation(pg.sprite.Sprite):
         self.type = _type
         self.game = game
         self.character = character
-        self.rot = -(self.character.direction - PLAYER["Weapon"]["Arc"] + 90) % 360
+        self.rot = -(self.character.direction - 45 + 90) % 360
         self.last_update = pg.time.get_ticks()
         self.image = self.game.weapon_animations[self.type]["Images"][0]
         self.image = pg.transform.rotate(self.image, self.rot)

@@ -1,0 +1,8 @@
+Name,Type,Speed,Damage,DEX,STR,INT,HASTE,MASTERY,Armor_value
+Basic,Basic,500,5,0,0,0,0,0,0
+Sword 1,Sword,500,10,0,50,0,50,50,0
+Sword 2,Sword,500,20,0,100,0,100,100,0
+Bow 1,Bow,500,10,50,0,0,50,0,0
+Bow 2,Bow,500,20,100,0,0,100,0,0
+God Sword,Sword,2000,100,0,200,0,0,0,0
+Wood Sword,Sword,500,2,0,0,0,0,0,0

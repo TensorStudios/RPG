@@ -1,0 +1,11 @@
+1. In a browser visit: https://developers.google.com/sheets/api/quickstart/python
+2. Click the "Enable The Google Sheets API" button
+3. Download the credentials.json file and place it in this folder (RPG/Items/api_credentials)
+    - Do not Add this file to git
+4. Install the google client library by:
+    - running the terminal in pycharm (this allows the installation to be on the right Virtual Env)
+    - entering the command: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+5. Run Main.py
+6. When the warning screen appears click "Advanced" and then "Go to Quickstart(unsafe)"
+7. Click "Allow"
+8. Close the browser window

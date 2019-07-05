@@ -3,7 +3,6 @@ import pygame as pg
 from Settings import *
 import random
 from NPC import Quests
-from Items.Weapons import WEAPONS
 from Player.PlayerData import PLAYER, get_exp_requirement
 from os import path, chdir, getcwd
 import sys
@@ -168,15 +167,17 @@ class Mob(pg.sprite.Sprite):
                 self.floating_dmg_amount = None
 
     def update(self):
-        logging.debug(f"updating mob {self.spawn_number}")
+        # logging.debug(f"updating mob {self.spawn_number}")
         if self.health <= 0:
             if self.dying:
                 if pg.time.get_ticks() - self.death_timer_start > self.death_timer:
                     logging.info(f"Mob {self.spawn_number} has died")
                     self.grant_exp()
                     self.update_quest()
+                    # Drop a random item
                     if random.random() >= DROP_RATE:
-                        Item(self.game, self.pos, "Health")
+                        drops = list(filter("Basic".__ne__, INVENTORY_TYPES))
+                        Item(self.game, self.pos, random.choice(drops))
                     self.kill()
             else:
                 self.dying = True
@@ -293,7 +294,11 @@ class Item(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.items
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = game.healthpack_img
+        print("Item dropped:", _type)
+        if _type == "Health":
+            self.image = game.healthpack_img
+        else:
+            self.image = game.placeholder_img
         self.rect = self.image.get_rect()
         self.hit_rect = self.rect
         self.type = _type

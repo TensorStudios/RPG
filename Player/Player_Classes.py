@@ -698,7 +698,10 @@ class Gunner(Player):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.walls, 'y')
         collide_with_walls(self, self.game.npcs, 'y')
-        self.rect.center = self.hit_rect.center
+        if self.facing == "L":
+            self.rect.center = (self.hit_rect.x, self.hit_rect.y + 25)
+        else:
+            self.rect.center = (self.hit_rect.x + 50, self.hit_rect.y + 25)
 
         # Animate character
         now = pg.time.get_ticks()

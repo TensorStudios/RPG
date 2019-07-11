@@ -218,7 +218,6 @@ class Game:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
             self.draw()
-            print(self.player.image)
             if not self.paused:
                 self.update()
 

@@ -572,18 +572,30 @@ class Gunner(Player):
         self.idle_left = []
         self.attack_right_list = []
         self.attack_left_list = []
-        for num in range(len(self.game.Gunner_imgs["Walk_Right"])):
+        for num in range(len(self.game.Knight_imgs["Walk_Right"])):
             self.walk_right.append(str(num + 1))
-        for num in range(len(self.game.Gunner_imgs["Walk_Left"])):
+        for num in range(len(self.game.Knight_imgs["Walk_Left"])):
             self.walk_left.append(str(num + 1))
-        for num in range(len(self.game.Gunner_imgs["Idle_Right"])):
+        for num in range(len(self.game.Knight_imgs["Idle_Right"])):
             self.idle_right.append(str(num + 1))
-        for num in range(len(self.game.Gunner_imgs["Idle_Left"])):
+        for num in range(len(self.game.Knight_imgs["Idle_Left"])):
             self.idle_left.append(str(num + 1))
-        for num in range(len(self.game.Gunner_imgs["Attack_Right"])):
+        for num in range(len(self.game.Knight_imgs["Attack_Right"])):
             self.attack_right_list.append(str(num + 1))
-        for num in range(len(self.game.Gunner_imgs["Attack_Left"])):
+        for num in range(len(self.game.Knight_imgs["Attack_Left"])):
             self.attack_left_list.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Walk_Right"])):
+        #     self.walk_right.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Walk_Left"])):
+        #     self.walk_left.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Idle_Right"])):
+        #     self.idle_right.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Idle_Left"])):
+        #     self.idle_left.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Attack_Right"])):
+        #     self.attack_right_list.append(str(num + 1))
+        # for num in range(len(self.game.Gunner_imgs["Attack_Left"])):
+        #     self.attack_left_list.append(str(num + 1))
         self.walk_right = cycle(self.walk_right)
         self.walk_left = cycle(self.walk_left)
         self.idle_right = cycle(self.idle_right)
@@ -593,7 +605,8 @@ class Gunner(Player):
 
 
         # These commands need to be placed in each class
-        self.image = self.game.Gunner_imgs["Idle_Right"]["1"]
+        self.image = self.game.Knight_imgs["Idle_Right"]["1"]
+        # self.image = self.game.Gunner_imgs["Idle_Right"]["1"]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.hit_rect.center = self.rect.center
@@ -717,30 +730,36 @@ class Gunner(Player):
             if self.vel == vec(0,0) and self.attacking is False:
                 if self.idle_frame_skip is False:
                     if self.facing == "R":
-                        self.image = self.game.Gunner_imgs["Idle_Right"][self.idle_right.__next__()]
+                        self.image = self.game.Knight_imgs["Idle_Right"][self.idle_right.__next__()]
+                        # self.image = self.game.Gunner_imgs["Idle_Right"][self.idle_right.__next__()]
                     if self.facing == "L":
-                        self.image = self.game.Gunner_imgs["Idle_Left"][self.idle_left.__next__()]
+                        self.image = self.game.Knight_imgs["Idle_Left"][self.idle_left.__next__()]
+                        # self.image = self.game.Gunner_imgs["Idle_Left"][self.idle_left.__next__()]
                     self.idle_frame_skip = True
                 else:
                     self.idle_frame_skip = False
             # Animate movement if character is moving
             if self.vel != vec(0, 0):
                 if self.facing == "R":
-                    self.image = self.game.Gunner_imgs["Walk_Right"][self.walk_right.__next__()]
+                    self.image = self.game.Knight_imgs["Walk_Right"][self.walk_right.__next__()]
+                    # self.image = self.game.Gunner_imgs["Walk_Right"][self.walk_right.__next__()]
                 else:
-                    self.image = self.game.Gunner_imgs["Walk_Left"][self.walk_left.__next__()]
+                    self.image = self.game.Knight_imgs["Walk_Left"][self.walk_left.__next__()]
+                    # self.image = self.game.Gunner_imgs["Walk_Left"][self.walk_left.__next__()]
             # Animate attacking if character is attacking but standing still
             else:
                 if self.attacking:
                     if self.attack_facing == "L":
                         try:
-                            self.image = self.game.Gunner_imgs["Attack_Left"][self.attack_right.__next__()]
+                            self.image = self.game.Knight_imgs["Attack_Left"][self.attack_right.__next__()]
+                            # self.image = self.game.Gunner_imgs["Attack_Left"][self.attack_right.__next__()]
                         except StopIteration:
                             self.attack_right = iter(self.attack_right_list)
                             self.attacking = False
                     else:
                         try:
-                            self.image = self.game.Gunner_imgs["Attack_Right"][self.attack_left.__next__()]
+                            self.image = self.game.Knight_imgs["Attack_Right"][self.attack_left.__next__()]
+                            # self.image = self.game.Gunner_imgs["Attack_Right"][self.attack_left.__next__()]
                         except StopIteration:
                             self.attack_left = iter(self.attack_left_list)
                             self.attacking = False

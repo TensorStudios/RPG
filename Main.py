@@ -125,6 +125,14 @@ class Game:
             "Walk_Left": {},
             "Walk_Right": {},
         }
+        self.Knight_imgs = {
+            "Attack_Left": {},
+            "Attack_Right": {},
+            "Idle_Left": {},
+            "Idle_Right": {},
+            "Walk_Left": {},
+            "Walk_Right": {},
+        }
 
         # IF this works, move to the top of this method
         pattern = re.compile(r"\((\d+)\)")
@@ -137,7 +145,6 @@ class Game:
                       "Walk_Right"]
 
         for animation in animations:
-
             dir_in_str = f"img/{class_to_load}/{animation}"
             directory = fsencode(dir_in_str)
             for file in listdir(directory):
@@ -147,6 +154,18 @@ class Game:
                 width = int(self.Gunner_imgs[animation][num].get_width() / 1.25)
                 height = int(self.Gunner_imgs[animation][num].get_height() / 1.25)
                 self.Gunner_imgs[animation][num] = pg.transform.scale(self.Gunner_imgs[animation][num], (width, height))
+
+        class_to_load = "Knight"
+        for animation in animations:
+            dir_in_str = f"img/{class_to_load}/{animation}"
+            directory = fsencode(dir_in_str)
+            for file in listdir(directory):
+                filename = "/" + fsdecode(file)
+                num = pattern.findall(filename)[0]
+                self.Knight_imgs[animation][num] = pg.image.load(resource_path(dir_in_str + filename)).convert_alpha()
+                width = int(self.Knight_imgs[animation][num].get_width() / 1.25)
+                height = int(self.Knight_imgs[animation][num].get_height() / 1.25)
+                self.Knight_imgs[animation][num] = pg.transform.scale(self.Knight_imgs[animation][num], (width, height))
 
 
         logging.info("Successfully loaded all data")

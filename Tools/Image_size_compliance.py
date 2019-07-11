@@ -10,7 +10,7 @@ import os
 # img.save("test_a.png")
 
 pattern = re.compile(r"\((\d+)\)")
-path = "C:\\Users\\CDOSUser\\PycharmProjects\\RPG\\img\\Gunner"
+path = "C:\\Users\\CDOSUser\\PycharmProjects\\RPG\\img\\Knight"
 folders = [
     "Attack_Left",
     "Attack_Right",

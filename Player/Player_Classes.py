@@ -1,5 +1,6 @@
 import logging
 import pygame as pg
+import itertools
 from itertools import cycle
 from Settings import *
 from NPC import Quests
@@ -39,10 +40,13 @@ class Player(pg.sprite.Sprite):
         self.rect = 0
 
         self.walk_frame_time = pg.time.get_ticks() - SPRITE_FRAME_DELAY
+        # Idle frame skip is used to slow down the fame rate while character sprite is idling
+        self.idle_frame_skip = False
         self.hit_rect = PLAYER["Hit Rect"]
         self.vel = vec(0, 0)
         self.pos = vec(x, y)
         self.facing = "R"
+        self.attack_facing = "R"
         self.direction = 270.0
         self.last_attack = pg.time.get_ticks() - 150
         self.attacking = False
@@ -110,22 +114,23 @@ class Player(pg.sprite.Sprite):
         movex = False
         movey = False
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vel += vec(-PLAYER["Speed"], 0)
-            movex = True
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vel += vec(PLAYER["Speed"], 0)
-            movex = True
-        if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vel += vec(0, -PLAYER["Speed"])
-            movey = True
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vel += vec(0, PLAYER["Speed"])
-            movey = True
-        if movex and movey:
-            self.vel *= 0.7071
-        if self.charging:
-            self.vel /= 2
+        if not self.attacking:
+            if keys[pg.K_LEFT] or keys[pg.K_a]:
+                self.vel += vec(-PLAYER["Speed"], 0)
+                movex = True
+            if keys[pg.K_RIGHT] or keys[pg.K_d]:
+                self.vel += vec(PLAYER["Speed"], 0)
+                movex = True
+            if keys[pg.K_UP] or keys[pg.K_w]:
+                self.vel += vec(0, -PLAYER["Speed"])
+                movey = True
+            if keys[pg.K_DOWN] or keys[pg.K_s]:
+                self.vel += vec(0, PLAYER["Speed"])
+                movey = True
+            if movex and movey:
+                self.vel *= 0.7071
+            if self.charging:
+                self.vel /= 2
 
         # Attack keys
 
@@ -301,6 +306,7 @@ class Player(pg.sprite.Sprite):
         self.rect.center = self.hit_rect.center
 
         # Animate character
+        print(self.attacking)
         now = pg.time.get_ticks()
         if now >= self.walk_frame_time + SPRITE_FRAME_DELAY:
             self.walk_frame_time = now
@@ -312,24 +318,24 @@ class Player(pg.sprite.Sprite):
                 self.facing = "R"
                 self.image = self.walk_right[self.update_frame(False)]
             # Animate movement if character is moving
-            if self.vel != vec(0, 0):
-                if self.attacking:
-                    if self.facing == "R":
-                        self.image = self.attack_right[self.update_frame()]
-                    else:
-                        self.image = self.attack_left[self.update_frame()]
-                else:
-                    if self.facing == "R":
-                        self.image = self.walk_right[self.update_frame()]
-                    else:
-                        self.image = self.walk_left[self.update_frame()]
+            # if self.vel != vec(0, 0):
+            #     if self.attacking:
+            #         if self.facing == "R":
+            #             self.image = self.attack_right[self.update_frame()]
+            #         else:
+            #             self.image = self.attack_left[self.update_frame()]
+            #     else:
+            #         if self.facing == "R":
+            #             self.image = self.walk_right[self.update_frame()]
+            #         else:
+            #             self.image = self.walk_left[self.update_frame()]
             # Animate attacking if character is attacking but standing still
-            else:
-                if self.attacking:
-                    if self.facing == "R":
-                        self.image = self.attack_right[self.update_frame(False)]
-                    else:
-                        self.image = self.attack_left[self.update_frame(False)]
+            # else:
+            if self.attacking:
+                if self.facing == "R":
+                    self.image = self.attack_right[self.update_frame(False)]
+                else:
+                    self.image = self.attack_left[self.update_frame(False)]
 
 
 class Knight(Player):
@@ -555,3 +561,183 @@ class Ranger(Player):
                 else:
                     self.charge_last = now
                     # print("Charging up")
+
+
+class Gunner(Player):
+    def __init__(self, game, x, y):
+        Player.__init__(self, game, x, y)
+        self.walk_right = []
+        self.walk_left = []
+        self.idle_right = []
+        self.idle_left = []
+        self.attack_right_list = []
+        self.attack_left_list = []
+        for num in range(len(self.game.Gunner_imgs["Walk_Right"])):
+            self.walk_right.append(str(num + 1))
+        for num in range(len(self.game.Gunner_imgs["Walk_Left"])):
+            self.walk_left.append(str(num + 1))
+        for num in range(len(self.game.Gunner_imgs["Idle_Right"])):
+            self.idle_right.append(str(num + 1))
+        for num in range(len(self.game.Gunner_imgs["Idle_Left"])):
+            self.idle_left.append(str(num + 1))
+        for num in range(len(self.game.Gunner_imgs["Attack_Right"])):
+            self.attack_right_list.append(str(num + 1))
+        for num in range(len(self.game.Gunner_imgs["Attack_Left"])):
+            self.attack_left_list.append(str(num + 1))
+        self.walk_right = cycle(self.walk_right)
+        self.walk_left = cycle(self.walk_left)
+        self.idle_right = cycle(self.idle_right)
+        self.idle_left = cycle(self.idle_left)
+        self.attack_right = iter(self.attack_right_list)
+        self.attack_left = iter(self.attack_left_list)
+
+
+        # These commands need to be placed in each class
+        self.image = self.game.Gunner_imgs["Idle_Right"]["1"]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.hit_rect.center = self.rect.center
+        self.right_click_ability = "Charged Shot"
+        self.trained_weapons = ["Bow"]
+
+        # stats
+        self.health = PLAYER["Health"]
+        self.mana = PLAYER["Mana"]
+        self.mana_recharge = PLAYER["Mana Recharge"]
+        self.mana_recharge_timer = pg.time.get_ticks()
+        self.attack_speed = PLAYER["Weapon"]["Speed"]
+        self.damage = PLAYER["Weapon"]["Damage"]
+
+        # Charging attack
+        self.charging = False
+        self.charge_start = pg.time.get_ticks()
+        self.charge_last = pg.time.get_ticks()
+        self.charge_time = 1000
+
+    def attack(self, ability="Default"):
+        # Set attack facing for animation
+        self.attack_facing = self.facing
+        # Find mobs in range
+        ability_modifier = PLAYER["Abilities"][ability]["Damage Modifier"]
+        # Check if player has enough mana
+        cost = PLAYER["Abilities"][ability]["Mana Cost"] < self.mana
+        # Check if it has been long enough
+        now = pg.time.get_ticks()
+        if now - self.calculate_haste(self.attack_speed) > self.last_attack and cost is True:
+            # Toggle animation flag
+            self.attacking = True
+            self.last_attack = now
+            logging.debug("player attacks")
+
+            # Calculate default damage
+            if ability == "Default":
+                damage = int(self.damage * self.dexterity / 10 * ability_modifier)
+                logging.debug("Spawning Arrow sprite")
+                _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+                self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                Arrow(self.game, self.rect.center, _dir, damage)
+
+        # handle_charged shot
+        if ability == "Charged Shot":
+            if not self.charging:
+                self.charging = True
+                self.charge_start = pg.time.get_ticks()
+                self.charge_last = pg.time.get_ticks()
+            else:
+                now = pg.time.get_ticks()
+                # check if the mouse button has been lifted up
+                if now - self.charge_last > 25:
+                    # print(now - self.charge_last)
+                    # print("timed out")
+                    self.charging = False
+                # check if the charge time has been completed
+                elif now - self.charge_start >= self.calculate_haste(self.charge_time):
+                    self.mana -= PLAYER["Abilities"][ability]["Mana Cost"]
+                    if self.mana < 0:
+                        self.mana = 0
+                    damage = int(self.damage * self.dexterity / 5 * ability_modifier)
+                    self.charging = False
+                    logging.debug("Spawning Arrow sprite")
+                    _dir = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+                    Arrow(self.game, self.rect.center, _dir, damage)
+                    # print("Shooting")
+                # if the mouse button is still pressed and the time is not up
+                else:
+                    self.charge_last = now
+                    # print("Charging up")
+
+    def update(self):
+        # Recharge Mana
+        self.recharge_mana()
+
+        self.apply_stats_from_gear()
+
+        # Check for active consumables
+        if self.consumable_active is not None:
+            # Check if the duration has expired
+            if pg.time.get_ticks() <= self.consumable_timeout:
+                if self.consumable_active == "Haste":
+                    self.haste += CONSUMABLES["Haste"]["Effect Value"]
+                if self.consumable_active == "Armor":
+                    self.armor_value += CONSUMABLES["Armor"]["Effect Value"]
+            # If the duration has expired, reset the active potion
+            else:
+                self.consumable_active = None
+                self.consumable_timeout = None
+
+        self.inventory.sort()
+
+        self.get_keys()
+        self.direction = -self.game.mouse_dir.angle_to(vec(1, 0)) % 360
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+        self.pos += self.vel * self.game.dt
+        self.hit_rect.centerx = self.pos.x
+        collide_with_walls(self, self.game.walls, 'x')
+        collide_with_walls(self, self.game.npcs, 'x')
+        self.hit_rect.centery = self.pos.y
+        collide_with_walls(self, self.game.walls, 'y')
+        collide_with_walls(self, self.game.npcs, 'y')
+        self.rect.center = self.hit_rect.center
+
+        # Animate character
+        now = pg.time.get_ticks()
+        if now >= self.walk_frame_time + SPRITE_FRAME_DELAY:
+            self.walk_frame_time = now
+            # Determine facing by mouse position
+            if 90 < self.direction < 270:
+                self.facing = "L"
+            else:
+                self.facing = "R"
+            # Animate Character if Idle
+            print(self.facing)
+            if self.vel == vec(0,0) and self.attacking is False:
+                if self.idle_frame_skip is False:
+                    if self.facing == "R":
+                        self.image = self.game.Gunner_imgs["Idle_Right"][self.idle_right.__next__()]
+                    if self.facing == "L":
+                        self.image = self.game.Gunner_imgs["Idle_Left"][self.idle_left.__next__()]
+                    self.idle_frame_skip = True
+                else:
+                    self.idle_frame_skip = False
+            # Animate movement if character is moving
+            if self.vel != vec(0, 0):
+                if self.facing == "R":
+                    self.image = self.game.Gunner_imgs["Walk_Right"][self.walk_right.__next__()]
+                else:
+                    self.image = self.game.Gunner_imgs["Walk_Left"][self.walk_left.__next__()]
+            # Animate attacking if character is attacking but standing still
+            else:
+                if self.attacking:
+                    if self.attack_facing == "L":
+                        try:
+                            self.image = self.game.Gunner_imgs["Attack_Left"][self.attack_right.__next__()]
+                        except StopIteration:
+                            self.attack_right = iter(self.attack_right_list)
+                            self.attacking = False
+                    else:
+                        try:
+                            self.image = self.game.Gunner_imgs["Attack_Right"][self.attack_left.__next__()]
+                        except StopIteration:
+                            self.attack_left = iter(self.attack_left_list)
+                            self.attacking = False

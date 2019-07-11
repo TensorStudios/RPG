@@ -21,9 +21,10 @@ import logging
 import datetime
 import pygame as pg
 import sys
+import re
 from Sprites import *
-from Player.Player_Classes import Player, Knight, Ranger
-from os import path, chdir, getcwd
+from Player.Player_Classes import Player, Knight, Ranger, Gunner
+from os import path, chdir, getcwd, fsencode, fsdecode, listdir
 from tilemap import *
 from NPC.NPC import QuestNPC
 from NPC.Quests import Quests
@@ -115,6 +116,39 @@ class Game:
             }
         }
         logging.debug("Success")
+
+        self.Gunner_imgs = {
+            "Attack_Left": {},
+            "Attack_Right": {},
+            "Idle_Left": {},
+            "Idle_Right": {},
+            "Walk_Left": {},
+            "Walk_Right": {},
+        }
+
+        # IF this works, move to the top of this method
+        pattern = re.compile(r"\((\d+)\)")
+        class_to_load = "Gunner"
+        animations = ["Attack_Left",
+                      "Attack_Right",
+                      "Idle_Left",
+                      "Idle_Right",
+                      "Walk_Left",
+                      "Walk_Right"]
+
+        for animation in animations:
+
+            dir_in_str = f"img/{class_to_load}/{animation}"
+            directory = fsencode(dir_in_str)
+            for file in listdir(directory):
+                filename = "/" + fsdecode(file)
+                num = pattern.findall(filename)[0]
+                self.Gunner_imgs[animation][num] = pg.image.load(resource_path(dir_in_str + filename)).convert_alpha()
+                width = int(self.Gunner_imgs[animation][num].get_width() / 1.25)
+                height = int(self.Gunner_imgs[animation][num].get_height() / 1.25)
+                self.Gunner_imgs[animation][num] = pg.transform.scale(self.Gunner_imgs[animation][num], (width, height))
+
+
         logging.info("Successfully loaded all data")
 
     def new(self):
@@ -152,24 +186,25 @@ class Game:
                 if self.player_class == "Knight":
                     self.player = Knight(self, object_center.x, object_center.y)
                 elif self.player_class == "Ranger":
-                    self.player = Ranger(self, object_center.x, object_center.y)
+                    self.player = Gunner(self, object_center.x, object_center.y)
+                    # self.player = Ranger(self, object_center.x, object_center.y)
                 logging.debug("Placing Player Sprite")
-            elif tile_object.name == "Mob":
-                Mob(self, object_center.x, object_center.y)
-                logging.debug("Placing Mob Sprite")
+            # elif tile_object.name == "Mob":
+            #     Mob(self, object_center.x, object_center.y)
+            #     logging.debug("Placing Mob Sprite")
             elif tile_object.name == "Wall":
                 Obstacle(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
                 logging.debug("Placing Obstacle sprite")
-            elif tile_object.name == "Health":
-                Item(self, (object_center.x, object_center.y), tile_object.name)
-                logging.debug("Placing Item Sprite")
-            elif tile_object.name == "NPC":
-                QuestNPC(self, object_center.x, object_center.y, ID=int(tile_object.type))
-                logging.debug("Placing NPC Sprite")
-            elif tile_object.name == "Mob_Spawn_Zone":
-                MobSpawnZone(tile_object.x, tile_object.y, tile_object.width, tile_object.height, self)
-            else:
-                logging.warning(f"{tile_object.name} is unable to be loaded because it has not been coded yet")
+            # elif tile_object.name == "Health":
+            #     Item(self, (object_center.x, object_center.y), tile_object.name)
+            #     logging.debug("Placing Item Sprite")
+            # elif tile_object.name == "NPC":
+            #     QuestNPC(self, object_center.x, object_center.y, ID=int(tile_object.type))
+            #     logging.debug("Placing NPC Sprite")
+            # elif tile_object.name == "Mob_Spawn_Zone":
+            #     MobSpawnZone(tile_object.x, tile_object.y, tile_object.width, tile_object.height, self)
+            # else:
+            #     logging.warning(f"{tile_object.name} is unable to be loaded because it has not been coded yet")
 
         # Create the camera object
         self.camera = Camera(self.map.width, self.map.height)
@@ -182,9 +217,10 @@ class Game:
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
+            self.draw()
+            print(self.player.image)
             if not self.paused:
                 self.update()
-            self.draw()
 
     def quit(self):
         logging.warning("Quitting Game")

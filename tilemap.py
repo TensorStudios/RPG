@@ -58,8 +58,8 @@ class Camera:
         return vec(mouse) + vec(-self.camera.left, -self.camera.top)
 
     def update(self, target):
-        x = -target.rect.x + int(WIDTH / 2)
-        y = -target.rect.y + int(HEIGHT / 2)
+        x = -target.hit_rect.x + int(WIDTH / 2)
+        y = -target.hit_rect.y + int(HEIGHT / 2)
 
         # limit scrolling to map size
         self.camera = pg.Rect(x, y, self.width, self.height)

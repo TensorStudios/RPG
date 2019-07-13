@@ -3,7 +3,7 @@ from Items.Items import WEAPONS, ARMOR, HATS
 
 PLAYER = {
     "Speed": 300,
-    "Hit Rect": pg.Rect(0, 0, 60, 90),
+    "Hit Rect": pg.Rect(0, 0, 90, 90),
     "Health": 100,
     "Mana": 50,
     "Mana Recharge": 200,

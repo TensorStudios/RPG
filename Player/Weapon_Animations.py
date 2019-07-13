@@ -44,7 +44,7 @@ class WeaponAnimation(pg.sprite.Sprite):
         if now - self.last_update > self.frame_rate:
             self.last_update = now
             if self.frame == len(self.game.weapon_animations[self.type]["Images"]):
-                self.character.attacking = False
+                # self.character.attacking = False
                 self.kill()
             else:
                 self.image = self.game.weapon_animations[self.type]["Images"][self.frame]

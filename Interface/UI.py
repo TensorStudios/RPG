@@ -3,18 +3,22 @@ import logging
 from os import path, chdir, getcwd
 from Settings import *
 
+
 def resource_path(relative_path):
+    # This is used for Freezing the code into a .exe file
     if hasattr(sys, '_MEIPASS'):
         return path.join(sys._MEIPASS, relative_path)
     return path.join(path.abspath("."), relative_path)
 
 
 def text_objects(text, font):
+    # print Font to an object
     textSurface = font.render(text, True, BLACK)
     return textSurface, textSurface.get_rect()
 
 
 def button(game, msg, x, y, w, h, ic, ac, action=None):
+    # Create a button that accepts font and has a function that it calls
     mouse = pg.mouse.get_pos()
     click = pg.mouse.get_pressed()
 
@@ -53,6 +57,7 @@ def button(game, msg, x, y, w, h, ic, ac, action=None):
 
 # HUD functions
 def draw_player_health(surf, x, y, pct):
+    # Draw the player's health to the screen
     if pct < 0:
         pct = 0
     BAR_LENGTH = 500
@@ -71,6 +76,7 @@ def draw_player_health(surf, x, y, pct):
 
 
 def draw_player_mana(surf, x, y, pct):
+    # Draw the player's mana to the screen
     if pct < 0:
         pct = 0
     BAR_LENGTH = 500
@@ -83,6 +89,8 @@ def draw_player_mana(surf, x, y, pct):
 
 
 def draw_player_equip1(surf, x, y, pct):
+    # Show ability 1
+    # TODO implement graphical abilities
     BAR_LENGTH = 100
     BAR_HEIGHT = 100
     fill = pct * BAR_LENGTH
@@ -93,6 +101,8 @@ def draw_player_equip1(surf, x, y, pct):
 
 
 def draw_player_equip2(surf, x, y, pct):
+    # Show ability 2
+    # TODO implement graphical abilities
     BAR_LENGTH = 100
     BAR_HEIGHT = 100
     fill = pct * BAR_LENGTH

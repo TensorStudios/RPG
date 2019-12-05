@@ -188,7 +188,7 @@ class Game:
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
-            if not self.paused:
+            if not self.paused and not self.show_inventory:
                 self.update()
             self.draw()
 

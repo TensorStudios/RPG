@@ -10,6 +10,8 @@ Devin Emnett
 
 """
 # Attempt to update items from google
+# Checks to see if the are credentials for the google api.
+# See /Items/api_credentials for more
 try:
     from Items import update_items_from_Google
     print("import from google successful")
@@ -31,6 +33,7 @@ from Player.PlayerData import PLAYER
 from Interface.UI import *
 
 
+# set logging level
 logging.basicConfig(filename=f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", level=logging.INFO,
                     format="%(asctime)s:%(levelname)s:%(message)s")
 
@@ -87,6 +90,7 @@ class Game:
         logging.debug("success")
 
         # Load Spritesheet image for animations
+        # TODO there is a better implementation of this in the new sprites branch
         logging.debug("loading spritesheet imgs")
         self.spritesheet_k_r = Spritesheet(resource_path(img_folder + "Knight.png"))
         self.spritesheet_k_l = Spritesheet(resource_path(img_folder + "Knight Left.png"))
@@ -133,7 +137,9 @@ class Game:
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
         logging.info("reseting class variables")
+        # Defines if the inventory is open on the screen
         self.show_inventory = False
+        # Defines if a dialog is open on the screen and it's options
         self.dialog = False
         self.dialog_selection = None
         self.dialog_text = ""
@@ -182,7 +188,7 @@ class Game:
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
-            if not self.paused:
+            if not self.paused and not self.show_inventory:
                 self.update()
             self.draw()
 
@@ -197,6 +203,7 @@ class Game:
         # Get the direction of the mouse relative to the character
         self.mouse_dir = vec(self.camera.mouse_adjustment(pg.mouse.get_pos())) - vec(self.player.pos)
 
+        # update all of the sprites by calling the group
         self.all_sprites.update()
         self.camera.update(self.player)
 
@@ -268,6 +275,7 @@ class Game:
 
     # Trigger dialog
     def open_dialog(self):
+        # I am not real sure that this needs to be it's own method
         if self.dialog:
             # logging.debug("Open Dialog")
             self.draw_dialog(self.screen, self.dialog_text, self.dialog_options)
@@ -329,6 +337,7 @@ class Game:
         self.draw_text(message, self.inventory_font, 20, WHITE, x + 5 + (box_width / 5), y + 15, "w")
 
     def pause_menu(self):
+        # pause the game and overlay the screen with a menu
         logging.info("Game paused")
         self.screen.blit(self.dim_screen, (0, 0))
         self.draw_text("MOTHA' FUCKIN' PAUSED", self.gameover_font, 70, WHITE, WIDTH / 2, HEIGHT / 4,
@@ -367,12 +376,12 @@ class Game:
         elif self.pause_menu_selection == 3:
             self.resume_game()
 
-    # Placeholder for game save
+    # TODO Placeholder for game save
     def save_game(self):
         self.pause_menu_selection = None
         logging.info("Game Saved")
 
-    # Placeholder for game load
+    # TODO Placeholder for game load
     def load_game(self):
         self.pause_menu_selection = None
         logging.info("Game Loaded")
@@ -384,22 +393,19 @@ class Game:
         self.playing = False
         logging.info("Loading Main Menu")
 
-    # Resume game
+    # Resume game from pause screen
     def resume_game(self):
         self.pause_menu_selection = None
         self.paused = False
         logging.info("Resuming Game")
 
     def draw(self):
-        # logging.debug("Drawing to screen")
+        # Physically draw the the game to the screen
         # Set the caption of the game to be the current FPS
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
         # Set the background of the screen to the Background color
         self.screen.blit(self.map_img, self.camera.apply_rect(self.map_rect))
-
-        # Debug draw grid
-        # self.draw_grid()
 
         # Draw each sprite to the screen
         for sprite in self.all_sprites:

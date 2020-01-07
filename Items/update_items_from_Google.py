@@ -1,4 +1,6 @@
-# from __future__ import print_function
+# Note: this is pretty much a copy and paste from google's instructions. It may be out of date
+
+
 import pickle
 import os.path
 from googleapiclient.discovery import build

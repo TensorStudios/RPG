@@ -23,6 +23,7 @@ class NonPlayerCharacter(pg.sprite.Sprite):
             "Example": "example"
         }
         # Remember to set the colorkey for the image just like this:
+        # I think this i
         # for image in self.images:
         #     self.images[image].set_colorkey(BG_SPRITE_COLOR)
         self.image = pg.Surface((TILESIZE, TILESIZE))

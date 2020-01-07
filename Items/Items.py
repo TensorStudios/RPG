@@ -1,5 +1,9 @@
 import csv
 
+# This file creates the the game's items based on the files saved locally
+# if the Google api is authenticated, this will run after the new files have been downloaded
+
+
 ARMOR = {}
 WEAPONS = {}
 HATS = {}
